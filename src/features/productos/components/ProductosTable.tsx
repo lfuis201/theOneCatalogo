@@ -1,0 +1,150 @@
+import React from "react";
+import { 
+  Table,
+  Chip, 
+  Tooltip, 
+  Button,
+} from "@heroui/react";
+import { Edit, Trash2, Eye } from "lucide-react";
+import type { Producto } from "../types";
+
+interface ProductosTableProps {
+  productos: Producto[];
+  onViewFicha?: (producto: Producto) => void;
+  onEdit?: (producto: Producto) => void;
+  onDelete?: (id: string) => void;
+}
+
+export function ProductosTable({ productos, onViewFicha, onEdit, onDelete }: ProductosTableProps) {
+  const columns = [
+    { name: "Producto", id: "nombre" },
+    { name: "Detalles", id: "detalles" },
+    { name: "Categoría", id: "categoria" },
+    { name: "Precio", id: "precio" },
+    { name: "Estado", id: "status" },
+    { name: "Acciones", id: "actions" },
+  ];
+
+  const renderCell = (producto: Producto, columnKey: React.Key) => {
+    switch (columnKey) {
+      case "nombre":
+        return (
+          <div className="flex flex-col">
+            <span className="text-[10px] uppercase font-black tracking-wider text-primary/70">{producto.marca}</span>
+            <span className="text-sm font-bold text-default-900">{producto.nombre}</span>
+            {producto.variante && <span className="text-tiny text-default-400">{producto.variante}</span>}
+          </div>
+        );
+      case "detalles":
+        return (
+          <div className="flex flex-col">
+            <p className="text-bold text-sm capitalize text-default-700">{producto.familiaOlfativa}</p>
+            <p className="text-bold text-tiny text-default-400">{producto.volumen} {producto.tipo}</p>
+          </div>
+        );
+      case "categoria":
+        const getCatColor = (cat: Producto['categoria']) => {
+          if (cat === 'Dama') return 'danger';
+          if (cat === 'Caballero') return 'primary';
+          if (cat === 'Unisex') return 'secondary';
+          return 'default';
+        };
+        return (
+          <Chip
+            className="capitalize font-bold border-none"
+            color={getCatColor(producto.categoria)}
+            size="sm"
+            variant="flat"
+          >
+            {producto.categoria || "Unisex"}
+          </Chip>
+        );
+      case "precio":
+        return (
+          <span className="text-sm font-bold text-default-900">
+            ${producto.precioTienda.toFixed(2)}
+          </span>
+        );
+      case "status":
+        return (
+          <Chip
+            className="capitalize border-none gap-1 text-default-600"
+            color={producto.status === "active" ? "success" : "danger"}
+            size="sm"
+            variant="flat"
+          >
+            {producto.status === "active" ? "Activo" : "Inactivo"}
+          </Chip>
+        );
+      case "actions":
+        return (
+          <div className="relative flex items-center gap-2">
+            <Tooltip content="Ver ficha técnica">
+              <Button 
+                isIconOnly 
+                size="sm" 
+                variant="light" 
+                className="text-primary hover:bg-primary/10"
+                onPress={() => onViewFicha?.(producto)}
+              >
+                <Eye size={18} />
+              </Button>
+            </Tooltip>
+            <Tooltip content="Editar producto">
+              <Button 
+                isIconOnly 
+                size="sm" 
+                variant="light" 
+                className="text-default-400 hover:text-primary"
+                onPress={() => onEdit?.(producto)}
+              >
+                <Edit size={18} />
+              </Button>
+            </Tooltip>
+            <Tooltip color="danger" content="Eliminar producto">
+              <Button 
+                isIconOnly 
+                size="sm" 
+                variant="light" 
+                className="text-danger"
+                onPress={() => onDelete?.(producto.id)}
+              >
+                <Trash2 size={18} />
+              </Button>
+            </Tooltip>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <Table>
+      <Table.ScrollContainer>
+        <Table.Content aria-label="Tabla de productos" className="min-w-[800px]">
+          <Table.Header>
+            <Table.Column isRowHeader>Producto</Table.Column>
+            <Table.Column>Detalles</Table.Column>
+            <Table.Column>Categoría</Table.Column>
+            <Table.Column>Precio</Table.Column>
+            <Table.Column>Estado</Table.Column>
+            <Table.Column>Acciones</Table.Column>
+          </Table.Header>
+          <Table.Body>
+            {productos.map((item) => (
+              <Table.Row key={item.id} id={item.id}>
+                <Table.Cell>{renderCell(item, "nombre")}</Table.Cell>
+                <Table.Cell>{renderCell(item, "detalles")}</Table.Cell>
+                <Table.Cell>{renderCell(item, "categoria")}</Table.Cell>
+                <Table.Cell>{renderCell(item, "precio")}</Table.Cell>
+                <Table.Cell>{renderCell(item, "status")}</Table.Cell>
+                <Table.Cell>{renderCell(item, "actions")}</Table.Cell>
+              </Table.Row>
+            ))}
+          </Table.Body>
+        </Table.Content>
+      </Table.ScrollContainer>
+    </Table>
+  );
+}

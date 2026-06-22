@@ -1,0 +1,93 @@
+export const DUMMY_CATALOG = [
+  {
+    id: "1",
+    name: "MISS ARMAF CHIC",
+    brand: "Armaf",
+    year: "2023",
+    family: "FRUTAL CÍTRICA",
+    volume: "100 ml",
+    code: "#6679",
+    notes: "naranja tangerina, bergamota",
+    category: "Dama",
+    image: "/Y0997166_C099700897_E01_RHC-removebg-preview.png",
+    bgGradient: "from-[#201042] via-[#5D226A] to-[#D5267D]"
+  },
+  {
+    id: "2",
+    name: "CLUB DE NUIT",
+    brand: "Armaf",
+    year: "2020",
+    family: "AMADERADA ESPECIADA",
+    volume: "105 ml",
+    code: "#8892",
+    notes: "limón, piña, abedul, almizcle",
+    category: "Caballero",
+    image: "/nanobanana.png",
+    bgGradient: "from-[#0F172A] via-[#1E293B] to-[#334155]"
+  },
+  {
+    id: "3",
+    name: "AMBER OUD",
+    brand: "Al Haramain",
+    year: "2018",
+    family: "ORIENTAL VAINILLA",
+    volume: "60 ml",
+    code: "#4412",
+    notes: "ámbar, vainilla, notas dulces",
+    category: "Unisex",
+    image: "/nanobanana.png",
+    bgGradient: "from-[#451A03] via-[#78350F] to-[#B45309]"
+  },
+  {
+    id: "4",
+    name: "LA VIE EST BELLE",
+    brand: "Lancome",
+    year: "2012",
+    family: "FLORAL GOURMAND",
+    volume: "100 ml",
+    code: "#1029",
+    notes: "iris, praliné, vainilla, pachulí",
+    category: "Dama",
+    image: "/Y0997166_C099700897_E01_RHC-removebg-preview.png",
+    bgGradient: "from-[#4A044E] via-[#831843] to-[#BE185D]"
+  },
+  {
+    id: "5",
+    name: "SAUVAGE ELIXIR",
+    brand: "Dior",
+    year: "2021",
+    family: "AROMÁTICA",
+    volume: "60 ml",
+    code: "#9931",
+    notes: "nuez moscada, canela, cardamomo, lavanda",
+    category: "Caballero",
+    image: "/nanobanana.png",
+    bgGradient: "from-[#020617] via-[#0F172A] to-[#1E3A8A]"
+  },
+  {
+    id: "6",
+    name: "BACCARAT ROUGE 540",
+    brand: "MFK",
+    year: "2015",
+    family: "AMBAR FLORAL",
+    volume: "70 ml",
+    code: "#5510",
+    notes: "azafrán, jazmín, amberwood",
+    category: "Unisex",
+    image: "/Y0997166_C099700897_E01_RHC-removebg-preview.png",
+    bgGradient: "from-[#7F1D1D] via-[#991B1B] to-[#B91C1C]"
+  },
+  {
+    id: "7",
+    name: "GOOD GIRL",
+    brand: "Carolina Herrera",
+    year: "2016",
+    family: "FLORAL ORIENTAL",
+    volume: "80 ml",
+    code: "#2231",
+    notes: "almendra, café, bergamota, limón",
+    category: "Dama",
+    image: "/Y0997166_C099700897_E01_RHC-removebg-preview.png",
+    bgGradient: "from-[#172554] via-[#1E3A8A] to-[#000000]"
+  }
+];
