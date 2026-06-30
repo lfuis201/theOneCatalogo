@@ -4,18 +4,20 @@ import {
   Chip, 
   Tooltip, 
   Button,
+  Skeleton,
 } from "@heroui/react";
 import { Edit, Trash2, Eye } from "lucide-react";
 import type { Producto } from "../types";
 
 interface ProductosTableProps {
   productos: Producto[];
+  isLoading?: boolean;
   onViewFicha?: (producto: Producto) => void;
   onEdit?: (producto: Producto) => void;
   onDelete?: (id: string) => void;
 }
 
-export function ProductosTable({ productos, onViewFicha, onEdit, onDelete }: ProductosTableProps) {
+export function ProductosTable({ productos, isLoading, onViewFicha, onEdit, onDelete }: ProductosTableProps) {
   const columns = [
     { name: "Producto", id: "nombre" },
     { name: "Detalles", id: "detalles" },
@@ -132,16 +134,51 @@ export function ProductosTable({ productos, onViewFicha, onEdit, onDelete }: Pro
             <Table.Column>Acciones</Table.Column>
           </Table.Header>
           <Table.Body>
-            {productos.map((item) => (
-              <Table.Row key={item.id} id={item.id}>
-                <Table.Cell>{renderCell(item, "nombre")}</Table.Cell>
-                <Table.Cell>{renderCell(item, "detalles")}</Table.Cell>
-                <Table.Cell>{renderCell(item, "categoria")}</Table.Cell>
-                <Table.Cell>{renderCell(item, "precio")}</Table.Cell>
-                <Table.Cell>{renderCell(item, "status")}</Table.Cell>
-                <Table.Cell>{renderCell(item, "actions")}</Table.Cell>
-              </Table.Row>
-            ))}
+            {isLoading ? (
+              Array.from({ length: 5 }).map((_, index) => (
+                <Table.Row key={`skeleton-${index}`} id={`skeleton-${index}`}>
+                  <Table.Cell>
+                    <div className="flex flex-col gap-1.5">
+                      <Skeleton className="h-3 w-12 rounded-lg" />
+                      <Skeleton className="h-4 w-32 rounded-lg" />
+                    </div>
+                  </Table.Cell>
+                  <Table.Cell>
+                    <div className="flex flex-col gap-1.5">
+                      <Skeleton className="h-4 w-24 rounded-lg" />
+                      <Skeleton className="h-3.5 w-16 rounded-lg" />
+                    </div>
+                  </Table.Cell>
+                  <Table.Cell>
+                    <Skeleton className="h-6 w-16 rounded-full" />
+                  </Table.Cell>
+                  <Table.Cell>
+                    <Skeleton className="h-4 w-12 rounded-lg" />
+                  </Table.Cell>
+                  <Table.Cell>
+                    <Skeleton className="h-6 w-16 rounded-full" />
+                  </Table.Cell>
+                  <Table.Cell>
+                    <div className="flex gap-2">
+                      <Skeleton className="h-8 w-8 rounded-lg" />
+                      <Skeleton className="h-8 w-8 rounded-lg" />
+                      <Skeleton className="h-8 w-8 rounded-lg" />
+                    </div>
+                  </Table.Cell>
+                </Table.Row>
+              ))
+            ) : (
+              productos.map((item) => (
+                <Table.Row key={item.id} id={item.id}>
+                  <Table.Cell>{renderCell(item, "nombre")}</Table.Cell>
+                  <Table.Cell>{renderCell(item, "detalles")}</Table.Cell>
+                  <Table.Cell>{renderCell(item, "categoria")}</Table.Cell>
+                  <Table.Cell>{renderCell(item, "precio")}</Table.Cell>
+                  <Table.Cell>{renderCell(item, "status")}</Table.Cell>
+                  <Table.Cell>{renderCell(item, "actions")}</Table.Cell>
+                </Table.Row>
+              ))
+            )}
           </Table.Body>
         </Table.Content>
       </Table.ScrollContainer>

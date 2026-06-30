@@ -61,15 +61,6 @@ export default function ProductosPage() {
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="h-[400px] w-full flex flex-col items-center justify-center gap-4">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-        <p className="text-primary/70 font-semibold animate-pulse">Cargando catálogo...</p>
-      </div>
-    );
-  }
-
   if (isError) {
     return (
       <div className="h-[400px] w-full flex flex-col items-center justify-center gap-4 text-center">
@@ -78,6 +69,8 @@ export default function ProductosPage() {
       </div>
     );
   }
+
+  const safeProductos = productos || [];
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
@@ -92,6 +85,7 @@ export default function ProductosPage() {
         <Button 
           onPress={handleAddClick}
           className="bg-primary text-white font-bold h-12 px-6 rounded-2xl shadow-lg shadow-primary/30"
+          isDisabled={isLoading}
         >
           <Plus size={20} />
           Nuevo Perfume
@@ -101,22 +95,27 @@ export default function ProductosPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card className="p-4 border-none shadow-xl shadow-primary/5 rounded-[2rem] bg-white">
           <p className="text-sm font-bold text-default-400 uppercase tracking-wider mb-1">Total Perfumes</p>
-          <p className="text-3xl font-black text-default-900">{productos.length}</p>
+          <p className="text-3xl font-black text-default-900">
+            {isLoading ? "..." : safeProductos.length}
+          </p>
         </Card>
         <Card className="p-4 border-none shadow-xl shadow-primary/5 rounded-[2rem] bg-white">
           <p className="text-sm font-bold text-default-400 uppercase tracking-wider mb-1">Activos</p>
-          <p className="text-3xl font-black text-success">{productos.filter(p => p.status === 'active').length}</p>
+          <p className="text-3xl font-black text-success">
+            {isLoading ? "..." : safeProductos.filter(p => p.status === 'active').length}
+          </p>
         </Card>
         <Card className="p-4 border-none shadow-xl shadow-primary/5 rounded-[2rem] bg-white">
           <p className="text-sm font-bold text-default-400 uppercase tracking-wider mb-1">Valor Inventario</p>
           <p className="text-3xl font-black text-primary">
-            ${productos.reduce((acc, curr) => acc + (curr.precioTienda || 0), 0).toFixed(2)}
+            {isLoading ? "..." : `$${safeProductos.reduce((acc, curr) => acc + (curr.precioTienda || 0), 0).toFixed(2)}`}
           </p>
         </Card>
       </div>
 
       <ProductosTable 
-        productos={productos} 
+        productos={safeProductos} 
+        isLoading={isLoading}
         onViewFicha={(producto) => setFichaProducto(producto)}
         onEdit={handleEditClick}
         onDelete={handleDeleteClick}
