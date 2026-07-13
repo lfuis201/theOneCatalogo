@@ -6,6 +6,7 @@ export const getClienteSchema = (isEdit: boolean) => {
     email: z.string().email("Email inválido"),
     telefono: z.string().min(7, "Teléfono inválido"),
     empresa: z.string().optional().nullable(),
+    status: z.enum(["active", "inactive"]).optional(),
     password: isEdit
       ? z.string().optional()
       : z.string().min(6, "La contraseña debe tener al menos 6 caracteres"),

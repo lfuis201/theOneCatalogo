@@ -6,7 +6,7 @@ export const clientesService = {
     const { data, error } = await supabase
       .from('usuarios')
       .select('*')
-      .eq('rol', 'cliente')
+      .neq('rol', 'admin')
       .order('created_at', { ascending: false });
 
     if (error) throw error;
@@ -31,12 +31,15 @@ export const clientesService = {
 
     const { data, error } = await supabase
       .from('usuarios')
-      .update({
+      .upsert({
+        id: userId,
+        nombre: cliente.nombre!,
+        email: cliente.email!,
         telefono: cliente.telefono || null,
         empresa: cliente.empresa || null,
+        rol: 'cliente',
         status: cliente.status || 'active',
       })
-      .eq('id', userId)
       .select()
       .single();
 

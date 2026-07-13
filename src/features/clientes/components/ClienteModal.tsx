@@ -4,11 +4,13 @@ import {
   TextField,
   Label,
   InputGroup,
+  Select,
+  ListBox,
 } from "@heroui/react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { User, Mail, Phone, Building, Key, Eye, EyeOff } from "lucide-react";
+import { User, Mail, Phone, Building, Key, Eye, EyeOff, ShieldAlert } from "lucide-react";
 import type { Cliente } from "../types";
 import { getClienteSchema, type ClienteFormValues } from "../schemas/clienteSchema";
 
@@ -26,6 +28,8 @@ export function ClienteModal({ isOpen, onOpenChange, onSubmit, cliente }: Client
     register,
     handleSubmit,
     reset,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm<ClienteFormValues>({
     resolver: zodResolver(getClienteSchema(!!cliente)),
@@ -34,9 +38,12 @@ export function ClienteModal({ isOpen, onOpenChange, onSubmit, cliente }: Client
       email: "",
       telefono: "",
       empresa: "",
+      status: "active",
       password: "",
     },
   });
+
+  const selectedStatus = watch("status");
 
   useEffect(() => {
     if (cliente && isOpen) {
@@ -45,6 +52,7 @@ export function ClienteModal({ isOpen, onOpenChange, onSubmit, cliente }: Client
         email: cliente.email || "",
         telefono: cliente.telefono || "",
         empresa: cliente.empresa || "",
+        status: cliente.status || "active",
         password: "",
       });
     } else if (isOpen) {
@@ -53,6 +61,7 @@ export function ClienteModal({ isOpen, onOpenChange, onSubmit, cliente }: Client
         email: "",
         telefono: "",
         empresa: "",
+        status: "active",
         password: "",
       });
     }
@@ -68,7 +77,7 @@ export function ClienteModal({ isOpen, onOpenChange, onSubmit, cliente }: Client
   return (
     <Modal.Backdrop isOpen={isOpen} onOpenChange={onOpenChange}>
       <Modal.Container>
-        <Modal.Dialog className="sm:max-w-[500px] bg-background border-none shadow-2xl rounded-[2.5rem] overflow-hidden">
+        <Modal.Dialog className="sm:max-w-[700px] bg-background border-none shadow-2xl rounded-[2.5rem] overflow-hidden">
           <Modal.CloseTrigger />
           <form onSubmit={handleSubmit(handleFormSubmit)} className="flex flex-col max-h-[90vh]">
             <Modal.Header className="flex flex-col gap-1 p-8 border-b border-default-100">
@@ -80,61 +89,60 @@ export function ClienteModal({ isOpen, onOpenChange, onSubmit, cliente }: Client
               </p>
             </Modal.Header>
             <Modal.Body className="gap-6 p-8 overflow-y-auto min-h-0">
-              <TextField isInvalid={!!errors.nombre}>
-                <Label className="text-primary font-bold mb-1 ml-1 text-sm">Nombre Completo</Label>
-                <InputGroup className="bg-primary/5 border-primary/10 hover:border-primary/20 focus-within:!border-primary rounded-xl h-11 transition-all">
-                  <InputGroup.Prefix className="pl-3 text-primary/40"><User size={18} /></InputGroup.Prefix>
-                  <InputGroup.Input 
-                    placeholder="Ej. Juan Pérez"
-                    {...register("nombre")}
-                    className="px-3 text-sm font-medium"
-                  />
-                </InputGroup>
-                {errors.nombre && <p className="text-danger text-tiny mt-1 ml-1">{errors.nombre.message}</p>}
-              </TextField>
-
-              <TextField isInvalid={!!errors.email}>
-                <Label className="text-primary font-bold mb-1 ml-1 text-sm">Correo Electrónico</Label>
-                <InputGroup className="bg-primary/5 border-primary/10 hover:border-primary/20 focus-within:!border-primary rounded-xl h-11 transition-all">
-                  <InputGroup.Prefix className="pl-3 text-primary/40"><Mail size={18} /></InputGroup.Prefix>
-                  <InputGroup.Input 
-                    placeholder="ejemplo@correo.com"
-                    {...register("email")}
-                    className="px-3 text-sm font-medium"
-                    disabled={!!cliente}
-                  />
-                </InputGroup>
-                {errors.email && <p className="text-danger text-tiny mt-1 ml-1">{errors.email.message}</p>}
-              </TextField>
-
-              {!cliente && (
-                <TextField isInvalid={!!errors.password}>
-                  <Label className="text-primary font-bold mb-1 ml-1 text-sm">Contraseña de Acceso</Label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <TextField isInvalid={!!errors.nombre}>
+                  <Label className="text-primary font-bold mb-1 ml-1 text-sm">Nombre Completo</Label>
                   <InputGroup className="bg-primary/5 border-primary/10 hover:border-primary/20 focus-within:!border-primary rounded-xl h-11 transition-all">
-                    <InputGroup.Prefix className="pl-3 text-primary/40"><Key size={18} /></InputGroup.Prefix>
+                    <InputGroup.Prefix className="pl-3 text-primary/40"><User size={18} /></InputGroup.Prefix>
                     <InputGroup.Input 
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Mínimo 6 caracteres"
-                      {...register("password")}
+                      placeholder="Ej. Juan Pérez"
+                      {...register("nombre")}
                       className="px-3 text-sm font-medium"
                     />
-                    <InputGroup.Suffix className="pr-2">
-                      <Button 
-                        isIconOnly 
-                        variant="ghost" 
-                        size="sm" 
-                        onPress={() => setShowPassword(!showPassword)}
-                        className="text-primary/60 hover:text-primary hover:bg-primary/10 rounded-xl"
-                      >
-                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                      </Button>
-                    </InputGroup.Suffix>
                   </InputGroup>
-                  {errors.password && <p className="text-danger text-tiny mt-1 ml-1">{errors.password.message}</p>}
+                  {errors.nombre && <p className="text-danger text-tiny mt-1 ml-1">{errors.nombre.message}</p>}
                 </TextField>
-              )}
 
-              <div className="grid grid-cols-2 gap-4">
+                <TextField isInvalid={!!errors.email}>
+                  <Label className="text-primary font-bold mb-1 ml-1 text-sm">Correo Electrónico</Label>
+                  <InputGroup className="bg-primary/5 border-primary/10 hover:border-primary/20 focus-within:!border-primary rounded-xl h-11 transition-all">
+                    <InputGroup.Prefix className="pl-3 text-primary/40"><Mail size={18} /></InputGroup.Prefix>
+                    <InputGroup.Input 
+                      placeholder="ejemplo@correo.com"
+                      {...register("email")}
+                      className="px-3 text-sm font-medium"
+                      disabled={!!cliente}
+                    />
+                  </InputGroup>
+                  {errors.email && <p className="text-danger text-tiny mt-1 ml-1">{errors.email.message}</p>}
+                </TextField>
+
+                {!cliente && (
+                  <TextField isInvalid={!!errors.password}>
+                    <Label className="text-primary font-bold mb-1 ml-1 text-sm">Contraseña de Acceso</Label>
+                    <InputGroup className="bg-primary/5 border-primary/10 hover:border-primary/20 focus-within:!border-primary rounded-xl h-11 transition-all overflow-hidden shadow-sm">
+                      <InputGroup.Input 
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Mínimo 6 caracteres"
+                        {...register("password")}
+                        className="px-3 text-sm font-medium"
+                      />
+                      <InputGroup.Suffix className="pr-2">
+                        <Button 
+                          isIconOnly 
+                          variant="ghost" 
+                          size="sm" 
+                          onPress={() => setShowPassword(!showPassword)}
+                          className="text-primary/60 hover:text-primary hover:bg-primary/10 rounded-xl"
+                        >
+                          {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                        </Button>
+                      </InputGroup.Suffix>
+                    </InputGroup>
+                    {errors.password && <p className="text-danger text-tiny mt-1 ml-1">{errors.password.message}</p>}
+                  </TextField>
+                )}
+
                 <TextField isInvalid={!!errors.telefono}>
                   <Label className="text-primary font-bold mb-1 ml-1 text-sm">Teléfono</Label>
                   <InputGroup className="bg-primary/5 border-primary/10 hover:border-primary/20 focus-within:!border-primary rounded-xl h-11 transition-all">
@@ -160,6 +168,27 @@ export function ClienteModal({ isOpen, onOpenChange, onSubmit, cliente }: Client
                   </InputGroup>
                   {errors.empresa && <p className="text-danger text-tiny mt-1 ml-1">{errors.empresa.message}</p>}
                 </TextField>
+
+                {cliente && (
+                  <div className="flex flex-col">
+                    <Label className="text-primary font-bold mb-1 ml-1 text-sm">Estado del Cliente</Label>
+                    <Select
+                      selectedKey={selectedStatus}
+                      onSelectionChange={(key) => setValue("status", key as any)}
+                      className="w-full"
+                    >
+                      <Select.Trigger className="bg-primary/5 border-primary/10 hover:border-primary/20 focus-within:!border-primary rounded-xl h-11 transition-all shadow-sm">
+                        <Select.Value className="text-sm font-medium" />
+                      </Select.Trigger>
+                      <Select.Popover>
+                        <ListBox>
+                          <ListBox.Item id="active" textValue="Activo">Activo <ListBox.ItemIndicator /></ListBox.Item>
+                          <ListBox.Item id="inactive" textValue="Inactivo">Inactivo <ListBox.ItemIndicator /></ListBox.Item>
+                        </ListBox>
+                      </Select.Popover>
+                    </Select>
+                  </div>
+                )}
               </div>
             </Modal.Body>
             <Modal.Footer className="p-8 border-t border-default-100">

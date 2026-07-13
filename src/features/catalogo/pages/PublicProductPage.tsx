@@ -22,63 +22,7 @@ export function PublicProductPage() {
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.5 }}
-      className="min-h-screen w-full flex flex-col bg-white text-black font-sans"
-    >
-      {/* Top Navbar / Header Simulation */}
-      <header className="w-full border-b border-gray-200 sticky top-0 z-30 bg-white">
-        {/* Main Nav area */}
-        <div className="max-w-[1400px] mx-auto px-6 h-20 flex items-center justify-between">
-          <div className="flex-1">
-            <span 
-              onClick={() => navigate("/catalogo")}
-              className="text-3xl font-serif tracking-widest uppercase font-bold cursor-pointer hover:opacity-80"
-            >
-              THEONE
-            </span>
-          </div>
-          
-          <div className="flex-1 flex justify-center">
-            <div className="w-full max-w-lg bg-gray-50 flex items-center px-4 py-2 rounded-sm border border-gray-100">
-              <span className="text-gray-400 mr-3 text-sm">⚲</span>
-              <input 
-                type="text" 
-                placeholder="¿Qué deseas buscar?" 
-                className="bg-transparent w-full outline-none text-sm font-light text-black placeholder:text-gray-400"
-              />
-            </div>
-          </div>
-
-          <div className="flex-1 flex justify-end items-center gap-6 text-xs tracking-wider">
-            <button className="flex items-center gap-2 hover:text-gray-600 transition-colors">
-              <span className="font-light">INICIAR SESIÓN</span>
-            </button>
-            <Heart size={20} className="font-light cursor-pointer hover:text-gray-600" />
-            <span className="cursor-pointer hover:text-gray-600 relative">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
-                <line x1="3" y1="6" x2="21" y2="6"></line>
-                <path d="M16 10a4 4 0 0 1-8 0"></path>
-              </svg>
-            </span>
-          </div>
-        </div>
-
-        {/* Categories Bar */}
-        <div className="w-full flex justify-center items-center h-12 text-[11px] font-medium tracking-[0.1em] gap-8">
-          <span className="cursor-pointer hover:underline underline-offset-4">DISEÑADORES</span>
-          <span className="cursor-pointer hover:underline underline-offset-4">MUJER</span>
-          <span className="cursor-pointer hover:underline underline-offset-4">HOMBRE</span>
-          <span className="cursor-pointer hover:underline underline-offset-4 font-bold border-b border-black">BELLEZA</span>
-        </div>
-      </header>
-
-      {/* Main Content Area */}
-      <div className="flex-1 w-full max-w-[1400px] mx-auto pt-6 px-6 pb-20">
+    <div className="flex-1 w-full max-w-[1400px] mx-auto pt-10 px-6 pb-20">
         
         {/* Brand Name Center Top */}
         <div className="w-full text-center mb-10 mt-4">
@@ -185,7 +129,6 @@ export function PublicProductPage() {
 
         </div>
       </div>
-    </motion.div>
   );
 }
 

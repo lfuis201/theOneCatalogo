@@ -1,13 +1,15 @@
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../features/auth';
 import { AuthPage } from '../features/auth/pages/AuthPage';
+import { RegisterPage } from '../features/auth/pages/RegisterPage';
 import { Dashboard } from '../features/dashboard';
 import { ClientesPage } from '../features/clientes';
 import { ProductosPage } from '../features/productos';
 import { SuscripcionesPage } from '../features/suscripciones';
-import { PublicCatalogPage, PublicProductPage, PublicBlogPostPage } from '../features/catalogo';
+import { PublicCatalogPage, PublicProductPage, PublicBlogPostPage, PublicPlansPage, PublicProfilePage } from '../features/catalogo';
 import { CategoriasPage } from '../features/categorias';
 import { MainLayout } from '../shared/layouts/MainLayout';
+import { PublicLayout } from '../shared/layouts/PublicLayout';
 import { AnimatePresence, motion } from 'framer-motion';
 import { PageTransition } from '../shared/components/PageTransition';
 
@@ -39,23 +41,35 @@ export function AppRouter() {
           className="min-h-screen w-full"
         >
           <Routes location={location}>
-            {/* Public Catalog Landing Page - Now Root */}
-            <Route path="/" element={
-              <PageTransition>
-                <PublicCatalogPage />
-              </PageTransition>
-            } />
-            <Route path="/catalogo" element={<Navigate to="/" replace />} />
-            <Route path="/catalogo/:id" element={
-              <PageTransition>
-                <PublicProductPage />
-              </PageTransition>
-            } />
-            <Route path="/blog/:id" element={
-              <PageTransition>
-                <PublicBlogPostPage />
-              </PageTransition>
-            } />
+            {/* Public routes wrapped in PublicLayout */}
+            <Route element={<PublicLayout />}>
+              <Route path="/" element={
+                <PageTransition>
+                  <PublicCatalogPage />
+                </PageTransition>
+              } />
+              <Route path="/catalogo" element={<Navigate to="/" replace />} />
+              <Route path="/catalogo/:id" element={
+                <PageTransition>
+                  <PublicProductPage />
+                </PageTransition>
+              } />
+              <Route path="/blog/:id" element={
+                <PageTransition>
+                  <PublicBlogPostPage />
+                </PageTransition>
+              } />
+              <Route path="/planes" element={
+                <PageTransition>
+                  <PublicPlansPage />
+                </PageTransition>
+              } />
+              <Route path="/perfil" element={
+                <PageTransition>
+                  <PublicProfilePage />
+                </PageTransition>
+              } />
+            </Route>
 
             {/* Admin Login Route */}
             <Route path="/login" element={
@@ -63,7 +77,11 @@ export function AppRouter() {
                 <AuthPage />
               </PageTransition>
             } />
-            <Route path="/register" element={<Navigate to="/login" replace />} />
+            <Route path="/register" element={
+              <PageTransition>
+                <RegisterPage />
+              </PageTransition>
+            } />
 
             {/* Private Routes */}
             <Route element={<MainLayout />}>

@@ -117,12 +117,14 @@ export default function ClientesPage() {
         onDelete={handleDeleteClick}
       />
 
-      <ClienteModal 
-        isOpen={isModalOpen} 
-        onOpenChange={handleOpenChange} 
-        onSubmit={handleFormSubmit} 
-        cliente={editingCliente}
-      />
+      {isModalOpen && (
+        <ClienteModal 
+          isOpen={isModalOpen} 
+          onOpenChange={handleOpenChange} 
+          onSubmit={handleFormSubmit} 
+          cliente={editingCliente}
+        />
+      )}
     </div>
   );
 }

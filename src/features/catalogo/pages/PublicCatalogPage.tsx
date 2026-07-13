@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { DUMMY_CATALOG } from "../data";
 import { AppPromoSection } from "../components/AppPromoSection";
+import { useAuth } from "../../auth";
 
 // Add some extra fragrances matching the user's specific search queries for a perfect "Buscador Inteligente" experience
 const EXTENDED_CATALOG = [
@@ -60,6 +61,7 @@ const EXTENDED_CATALOG = [
 
 export function PublicCatalogPage() {
   const navigate = useNavigate();
+  const { user, signOut } = useAuth();
   
   // Section scrolls
   const scrollToSection = (id: string) => {
@@ -141,63 +143,7 @@ export function PublicCatalogPage() {
   });
 
   return (
-    <div className="min-h-screen bg-[#fafafa] text-black font-sans selection:bg-[#D4AF37] selection:text-black flex flex-col overflow-x-hidden">
-      
-      {/* Styles for premium font and custom scrollbar */}
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Inter:wght@200;300;400;500;600;700;800&display=swap');
-        .font-serif-elegant {
-          font-family: 'Cormorant Garamond', serif;
-        }
-        .font-sans-clean {
-          font-family: 'Inter', sans-serif;
-        }
-        .text-gold {
-          color: #C5A028;
-        }
-        .bg-gold-gradient {
-          background: linear-gradient(135deg, #ECC844 0%, #D4AF37 50%, #C5A028 100%);
-        }
-        .border-gold {
-          border-color: rgba(197, 160, 40, 0.4);
-        }
-        .border-gold-focus:focus-within {
-          border-color: #C5A028;
-        }
-        html {
-          scroll-behavior: smooth;
-        }
-      `}</style>
-
-      {/* 1. MENÚ DE NAVEGACIÓN (Header / Navbar) */}
-      <header className="w-full border-b border-black/10 sticky top-0 z-50 bg-[#fafafa]/90 backdrop-blur-md">
-        <div className="max-w-[1200px] mx-auto px-6 h-20 flex items-center justify-between">
-          <div 
-            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-            className="flex items-center cursor-pointer group"
-          >
-            <span className="text-2xl font-serif-elegant tracking-[0.25em] uppercase font-bold text-black group-hover:text-[#C5A028] transition-colors duration-300">
-              THE<span className="text-gold font-black">ONE</span>
-            </span>
-          </div>
-
-          <nav className="hidden lg:flex items-center gap-8 text-[11px] font-sans-clean font-bold tracking-[0.2em] uppercase">
-            <button onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} className="hover:text-[#C5A028] text-[#C5A028] transition-colors bg-transparent border-0 cursor-pointer">Inicio</button>
-            <button onClick={() => scrollToSection("nosotros")} className="hover:text-[#C5A028] text-black/70 transition-colors text-left bg-transparent border-0 cursor-pointer">Nosotros</button>
-            <button onClick={() => scrollToSection("catalogo-fisico")} className="hover:text-[#C5A028] text-black/70 transition-colors text-left bg-transparent border-0 cursor-pointer">Catálogo Físico</button>
-            <button onClick={() => scrollToSection("aplicacion-digital")} className="hover:text-[#C5A028] text-black/70 transition-colors text-left bg-transparent border-0 cursor-pointer">Aplicación Digital</button>
-            <button onClick={() => scrollToSection("distribuidores")} className="hover:text-[#C5A028] text-black/70 transition-colors text-left bg-transparent border-0 cursor-pointer">Distribuidores</button>
-            <button onClick={() => scrollToSection("contacto")} className="hover:text-[#C5A028] text-black/70 transition-colors text-left bg-transparent border-0 cursor-pointer">Contacto</button>
-          </nav>
-
-          <Button 
-            onPress={() => scrollToSection("distribuidores")}
-            className="border border-[#C5A028]/40 text-[#C5A028] hover:bg-[#C5A028] hover:text-white bg-transparent font-sans-clean font-bold text-[9px] tracking-widest uppercase h-9 rounded-none transition-all px-4"
-          >
-            Canal B2B
-          </Button>
-        </div>
-      </header>
+    <>
 
       {/* 2. SECCIÓN / PÁGINA: INICIO (HOME) */}
       <section className="relative w-full min-h-[calc(100vh-80px)] flex flex-col justify-center items-center px-6 py-20 overflow-hidden border-b border-black/5 bg-[#fafafa]">
@@ -947,6 +893,6 @@ export function PublicCatalogPage() {
         </div>
       </footer>
 
-    </div>
+    </>
   );
 }

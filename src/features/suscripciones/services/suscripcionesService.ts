@@ -23,6 +23,31 @@ export const suscripcionesService = {
     }));
   },
 
+  async getByUserId(usuarioId: string): Promise<Subscription | null> {
+    const { data, error } = await supabase
+      .from('suscripciones')
+      .select('*, usuarios:usuario_id(nombre, email)')
+      .eq('usuario_id', usuarioId)
+      .order('created_at', { ascending: false })
+      .limit(1);
+
+    if (error) throw error;
+    if (!data || data.length === 0) return null;
+
+    const row = data[0];
+    return {
+      id: row.id,
+      clienteNombre: row.usuarios?.nombre || 'Desconocido',
+      clienteEmail: row.usuarios?.email || 'N/A',
+      plan: row.plan,
+      status: row.status,
+      price: Number(row.price),
+      startDate: row.start_date,
+      nextRenewal: row.next_renewal,
+      paymentStatus: 'Paid',
+    };
+  },
+
   async create(suscripcion: {
     usuarioId: string;
     plan: string;

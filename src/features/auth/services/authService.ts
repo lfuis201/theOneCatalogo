@@ -21,6 +21,23 @@ export const authService = {
       }
     });
     if (error) throw error;
+
+    // Explicit fallback: insert/upsert user into public.usuarios table
+    if (data.user) {
+      const { error: profileError } = await supabase
+        .from('usuarios')
+        .upsert({
+          id: data.user.id,
+          nombre: nombre,
+          email: email,
+          rol: 'cliente',
+          status: 'active'
+        });
+      if (profileError) {
+        console.error("Error al crear perfil de usuario en base de datos:", profileError);
+      }
+    }
+
     return data;
   },
 

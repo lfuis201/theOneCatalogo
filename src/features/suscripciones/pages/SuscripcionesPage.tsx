@@ -1,9 +1,9 @@
 import { useState, useMemo, useEffect } from "react";
-import { 
-  Button, 
-  Card, 
-  Table, 
-  Chip, 
+import {
+  Button,
+  Card,
+  Table,
+  Chip,
   Tooltip,
   Modal,
   TextField,
@@ -19,13 +19,13 @@ import { SuscripcionPagosModal } from "../components/SuscripcionPagosModal";
 import type { Subscription, SubscriptionPlan } from "../types";
 
 export default function SuscripcionesPage() {
-  const { 
-    subscriptions, 
-    isLoading: isLoadingSubs, 
+  const {
+    subscriptions,
+    isLoading: isLoadingSubs,
     isError: isErrorSubs,
     error: errorSubs,
-    createSuscripcion, 
-    updateSuscripcion, 
+    createSuscripcion,
+    updateSuscripcion,
     deleteSuscripcion,
     createPayment,
     deletePayment,
@@ -40,9 +40,9 @@ export default function SuscripcionesPage() {
 
   // Form States
   const [selectedUsuarioId, setSelectedUsuarioId] = useState("");
-  const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan>("Bronze Decanter");
+  const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan>("Silver Collector");
   const [selectedStatus, setSelectedStatus] = useState<'Active' | 'Paused' | 'Cancelled'>("Active");
-  const [customPrice, setCustomPrice] = useState("15.00");
+  const [customPrice, setCustomPrice] = useState("29.00");
   const [startDate, setStartDate] = useState("");
   const [nextRenewal, setNextRenewal] = useState("");
 
@@ -66,9 +66,9 @@ export default function SuscripcionesPage() {
       setNextRenewal(editingSub.nextRenewal);
     } else if (isOpen) {
       setSelectedUsuarioId("");
-      setSelectedPlan("Bronze Decanter");
+      setSelectedPlan("Silver Collector");
       setSelectedStatus("Active");
-      setCustomPrice("15.00");
+      setCustomPrice("29.00");
       setStartDate(new Date().toISOString().split("T")[0]);
       setNextRenewal(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0]);
     }
@@ -197,7 +197,7 @@ export default function SuscripcionesPage() {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500 font-sans">
-      
+
       {/* Header */}
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="space-y-1">
@@ -207,7 +207,7 @@ export default function SuscripcionesPage() {
           </h1>
           <p className="text-default-500 font-medium">Gestión del Club de Perfumes y suscripciones de decants mensuales.</p>
         </div>
-        <Button 
+        <Button
           onPress={handleAddClick}
           className="bg-primary text-white font-bold h-12 px-6 rounded-2xl shadow-lg shadow-primary/30"
         >
@@ -217,14 +217,14 @@ export default function SuscripcionesPage() {
       </header>
 
       {/* Metrics Row */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card className="p-6 border-none shadow-xl shadow-primary/5 rounded-[2rem] bg-white flex flex-row items-center justify-between">
           <div>
-            <p className="text-sm font-bold text-default-400 uppercase tracking-wider mb-1">Ingreso Mensual (MRR)</p>
-            <p className="text-3xl font-black text-default-900">${metrics.mrr}.00 USD</p>
+            <p className="text-sm font-bold text-default-400 uppercase tracking-wider mb-1">Ingresos Estimados</p>
+            <p className="text-3xl font-black text-default-900">${metrics.mrr.toFixed(2)}</p>
           </div>
           <div className="p-4 bg-primary/10 rounded-2xl text-primary">
-            <Sparkles size={24} />
+            <DollarSign size={24} />
           </div>
         </Card>
         <Card className="p-6 border-none shadow-xl shadow-primary/5 rounded-[2rem] bg-white flex flex-row items-center justify-between">
@@ -236,85 +236,6 @@ export default function SuscripcionesPage() {
             <Activity size={24} />
           </div>
         </Card>
-        <Card className="p-6 border-none shadow-xl shadow-primary/5 rounded-[2rem] bg-white flex flex-row items-center justify-between">
-          <div>
-            <p className="text-sm font-bold text-default-400 uppercase tracking-wider mb-1">Miembros VIP Gold</p>
-            <p className="text-3xl font-black text-warning">{metrics.vipCount}</p>
-          </div>
-          <div className="p-4 bg-warning/10 rounded-2xl text-warning">
-            <Sparkles size={24} />
-          </div>
-        </Card>
-      </div>
-
-      {/* Plans Pricing Grid Section */}
-      <div className="space-y-4">
-        <h2 className="text-xl font-black text-default-800 tracking-tight">Planes de Perfumes Disponibles</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          
-          <Card className="p-6 border border-default-100 shadow-lg rounded-[2rem] bg-white relative overflow-hidden">
-            <div className="space-y-2">
-              <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-default-100 text-default-600">Básico</span>
-              <h3 className="text-xl font-bold text-default-800">Bronze Decanter</h3>
-              <p className="text-3xl font-black text-default-900">$15<span className="text-sm font-medium text-default-400">/mes</span></p>
-              <div className="pt-4 space-y-2.5">
-                <div className="flex items-center gap-2 text-sm text-default-500">
-                  <Check size={16} className="text-success" />
-                  1 Decant Premium de 10ml al mes
-                </div>
-                <div className="flex items-center gap-2 text-sm text-default-500">
-                  <Check size={16} className="text-success" />
-                  Envío estándar gratis
-                </div>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-6 border-2 border-secondary shadow-lg rounded-[2rem] bg-white relative overflow-hidden">
-            <div className="space-y-2">
-              <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-secondary/10 text-secondary">Recomendado</span>
-              <h3 className="text-xl font-bold text-default-800">Silver Collector</h3>
-              <p className="text-3xl font-black text-default-900">$29<span className="text-sm font-medium text-default-400">/mes</span></p>
-              <div className="pt-4 space-y-2.5">
-                <div className="flex items-center gap-2 text-sm text-default-500">
-                  <Check size={16} className="text-success" />
-                  3 Decants Premium de 10ml al mes
-                </div>
-                <div className="flex items-center gap-2 text-sm text-default-500">
-                  <Check size={16} className="text-success" />
-                  Envío prioritario gratis
-                </div>
-                <div className="flex items-center gap-2 text-sm text-default-500">
-                  <Check size={16} className="text-success" />
-                  Acceso a muestras de nicho
-                </div>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-6 border border-warning shadow-lg rounded-[2rem] bg-white relative overflow-hidden">
-            <div className="space-y-2">
-              <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-warning/10 text-warning">Miembro VIP</span>
-              <h3 className="text-xl font-bold text-default-800">VIP Gold Perfumer</h3>
-              <p className="text-3xl font-black text-default-900">$49<span className="text-sm font-medium text-default-400">/mes</span></p>
-              <div className="pt-4 space-y-2.5">
-                <div className="flex items-center gap-2 text-sm text-default-500">
-                  <Check size={16} className="text-success" />
-                  5 Decants de Súper Lujo al mes
-                </div>
-                <div className="flex items-center gap-2 text-sm text-default-500">
-                  <Check size={16} className="text-success" />
-                  Perfume completo de regalo en cumpleaños
-                </div>
-                <div className="flex items-center gap-2 text-sm text-default-500">
-                  <Check size={16} className="text-success" />
-                  Soporte personalizado 24/7
-                </div>
-              </div>
-            </div>
-          </Card>
-
-        </div>
       </div>
 
       {/* Subscriptions Table */}
@@ -334,7 +255,7 @@ export default function SuscripcionesPage() {
               <Table.Body>
                 {subscriptions.map((item) => (
                   <Table.Row key={item.id} id={item.id}>
-                    
+
                     {/* Subscriber cell */}
                     <Table.Cell>
                       <div className="flex flex-col">
@@ -351,7 +272,7 @@ export default function SuscripcionesPage() {
                         variant="flat"
                         className="font-bold border-none"
                       >
-                        {item.plan}
+                        {item.plan === "Silver Collector" ? "Licencia App" : item.plan}
                       </Chip>
                     </Table.Cell>
 
@@ -387,10 +308,10 @@ export default function SuscripcionesPage() {
                     <Table.Cell>
                       <div className="relative flex items-center justify-center gap-2">
                         <Tooltip content="Ver Historial de Pagos">
-                          <Button 
-                            isIconOnly 
-                            size="sm" 
-                            variant="light" 
+                          <Button
+                            isIconOnly
+                            size="sm"
+                            variant="light"
                             className="text-primary hover:bg-primary/10"
                             onPress={() => {
                               setSelectedSubForPagos(item);
@@ -401,10 +322,10 @@ export default function SuscripcionesPage() {
                           </Button>
                         </Tooltip>
                         <Tooltip content="Editar suscripción">
-                          <Button 
-                            isIconOnly 
-                            size="sm" 
-                            variant="light" 
+                          <Button
+                            isIconOnly
+                            size="sm"
+                            variant="light"
                             className="text-default-400 hover:text-primary"
                             onPress={() => handleEditClick(item)}
                           >
@@ -412,10 +333,10 @@ export default function SuscripcionesPage() {
                           </Button>
                         </Tooltip>
                         <Tooltip color="danger" content="Eliminar suscripción">
-                          <Button 
-                            isIconOnly 
-                            size="sm" 
-                            variant="light" 
+                          <Button
+                            isIconOnly
+                            size="sm"
+                            variant="light"
                             className="text-danger"
                             onPress={() => handleDeleteSubscription(item.id)}
                           >
@@ -444,14 +365,14 @@ export default function SuscripcionesPage() {
                   {editingSub ? "Editar Suscripción" : "Activar Nueva Suscripción"}
                 </Modal.Heading>
                 <p className="text-sm text-default-500 font-medium tracking-wide">
-                  {editingSub 
-                    ? `Editando suscripción de ${editingSub.clienteNombre}` 
+                  {editingSub
+                    ? `Editando suscripción de ${editingSub.clienteNombre}`
                     : "Vincula un cliente a un plan de decants mensuales."}
                 </p>
               </Modal.Header>
 
               <Modal.Body className="gap-6 p-8 overflow-y-auto min-h-0">
-                
+
                 {/* Cliente Selector (only visible on creation) */}
                 {!editingSub && (
                   <Select
@@ -495,9 +416,7 @@ export default function SuscripcionesPage() {
                   </Select.Trigger>
                   <Select.Popover>
                     <ListBox>
-                      <ListBox.Item id="Bronze Decanter" textValue="Bronze Decanter ($15.00/mes)">Bronze Decanter ($15.00/mes) <ListBox.ItemIndicator /></ListBox.Item>
-                      <ListBox.Item id="Silver Collector" textValue="Silver Collector ($29.00/mes)">Silver Collector ($29.00/mes) <ListBox.ItemIndicator /></ListBox.Item>
-                      <ListBox.Item id="VIP Gold Perfumer" textValue="VIP Gold Perfumer ($49.00/mes)">VIP Gold Perfumer ($49.00/mes) <ListBox.ItemIndicator /></ListBox.Item>
+                      <ListBox.Item id="Silver Collector" textValue="Licencia App ($29.00/mes)">Licencia App ($29.00/mes) <ListBox.ItemIndicator /></ListBox.Item>
                     </ListBox>
                   </Select.Popover>
                 </Select>
@@ -506,7 +425,7 @@ export default function SuscripcionesPage() {
                 <TextField>
                   <Label className="text-primary font-bold mb-1 ml-1 text-sm">Precio Mensual ($)</Label>
                   <InputGroup className="bg-primary/5 border-primary/10 hover:border-primary/20 focus-within:!border-primary rounded-xl h-11 transition-all">
-                    <InputGroup.Input 
+                    <InputGroup.Input
                       type="number"
                       placeholder="0.00"
                       value={customPrice}
@@ -543,7 +462,7 @@ export default function SuscripcionesPage() {
                   <TextField>
                     <Label className="text-primary font-bold mb-1 ml-1 text-sm">Inicio</Label>
                     <InputGroup className="bg-primary/5 border-primary/10 hover:border-primary/20 focus-within:!border-primary rounded-xl h-11 transition-all">
-                      <InputGroup.Input 
+                      <InputGroup.Input
                         type="date"
                         value={startDate}
                         onChange={(e) => setStartDate(e.target.value)}
@@ -556,7 +475,7 @@ export default function SuscripcionesPage() {
                   <TextField>
                     <Label className="text-primary font-bold mb-1 ml-1 text-sm">Próxima Renovación</Label>
                     <InputGroup className="bg-primary/5 border-primary/10 hover:border-primary/20 focus-within:!border-primary rounded-xl h-11 transition-all">
-                      <InputGroup.Input 
+                      <InputGroup.Input
                         type="date"
                         value={nextRenewal}
                         onChange={(e) => setNextRenewal(e.target.value)}
@@ -570,15 +489,15 @@ export default function SuscripcionesPage() {
               </Modal.Body>
 
               <Modal.Footer className="p-8 border-t border-default-100 flex justify-end gap-3">
-                <Button 
-                  variant="flat" 
-                  color="danger" 
+                <Button
+                  variant="flat"
+                  color="danger"
                   onPress={handleOpenChange}
                   className="font-bold rounded-xl h-11 px-6"
                 >
                   Cancelar
                 </Button>
-                <Button 
+                <Button
                   type="submit"
                   className="bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/30 h-11 px-6"
                 >
