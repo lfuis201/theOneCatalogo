@@ -35,9 +35,6 @@ export function ProductoFichaModal({ isOpen, onOpenChange, producto }: ProductoF
                   <Modal.Heading className="text-3xl font-black text-default-900 tracking-tight">
                     {producto.nombre}
                   </Modal.Heading>
-                  {producto.variante && (
-                    <p className="text-sm font-semibold text-default-400 mt-0.5">{producto.variante}</p>
-                  )}
                 </div>
               </div>
             </Modal.Header>
@@ -63,14 +60,7 @@ export function ProductoFichaModal({ isOpen, onOpenChange, producto }: ProductoF
                   </span>
                 </div>
                 
-                <div className="flex flex-col gap-1">
-                  <span className="text-xs font-bold text-default-400 uppercase tracking-wider flex items-center gap-1">
-                    <Star size={14} className="text-primary/70" /> Ocasión
-                  </span>
-                  <span className="text-sm font-semibold text-default-900 capitalize">
-                    {producto.ocasion || "N/A"}
-                  </span>
-                </div>
+
 
                 <div className="flex flex-col gap-1">
                   <span className="text-xs font-bold text-default-400 uppercase tracking-wider flex items-center gap-1">
@@ -81,14 +71,7 @@ export function ProductoFichaModal({ isOpen, onOpenChange, producto }: ProductoF
                   </span>
                 </div>
 
-                <div className="flex flex-col gap-1">
-                  <span className="text-xs font-bold text-default-400 uppercase tracking-wider flex items-center gap-1">
-                    <Eye size={14} className="text-primary/70" /> Tipo
-                  </span>
-                  <span className="text-sm font-semibold text-default-900 uppercase">
-                    {producto.tipo || "N/A"}
-                  </span>
-                </div>
+
 
                 <div className="flex flex-col gap-1">
                   <span className="text-xs font-bold text-default-400 uppercase tracking-wider flex items-center gap-1">

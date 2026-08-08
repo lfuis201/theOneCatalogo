@@ -12,6 +12,7 @@ import { MainLayout } from '../shared/layouts/MainLayout';
 import { PublicLayout } from '../shared/layouts/PublicLayout';
 import { AnimatePresence, motion } from 'framer-motion';
 import { PageTransition } from '../shared/components/PageTransition';
+import { AdminsPage, EmpresasPage, ProductosGlobalesPage, SuscripcionesGlobalesPage } from '../features/superadmin';
 
 export function AppRouter() {
   const { user, loading } = useAuth();
@@ -90,6 +91,10 @@ export function AppRouter() {
               <Route path="/productos" element={<ProductosPage />} />
               <Route path="/categorias" element={<CategoriasPage />} />
               <Route path="/suscripciones" element={<SuscripcionesPage />} />
+              <Route path="/superadmin" element={<AdminsPage />} />
+              <Route path="/superadmin/empresas" element={<EmpresasPage />} />
+              <Route path="/superadmin/productos" element={<ProductosGlobalesPage />} />
+              <Route path="/superadmin/suscripciones" element={<SuscripcionesGlobalesPage />} />
             </Route>
 
             {/* Fallback to Root */}

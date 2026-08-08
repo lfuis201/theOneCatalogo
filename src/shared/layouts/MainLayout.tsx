@@ -19,7 +19,7 @@ export function MainLayout() {
     return <Navigate to="/" replace />;
   }
 
-  if (profile && profile.rol !== 'admin') {
+  if (profile && profile.rol !== 'admin' && profile.rol !== 'superadmin') {
     return <Navigate to="/catalogo" replace />;
   }
 

@@ -6,14 +6,16 @@ import {
   InputGroup,
   Select,
   ListBox,
+  toast,
 } from "@heroui/react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { Producto } from "../types";
 import { useCategorias } from "../../categorias/hooks/useCategorias";
-import { Package } from "lucide-react";
+import { Package, Upload, Image as ImageIcon } from "lucide-react";
 import { productoSchema, type ProductoFormValues } from "../schemas/productoSchema";
+import { useProductos } from "../hooks/useProductos";
 
 interface ProductoModalProps {
   isOpen: boolean;
@@ -24,7 +26,22 @@ interface ProductoModalProps {
 
 export function ProductoModal({ isOpen, onOpenChange, onSubmit, producto }: ProductoModalProps) {
   const { categorias } = useCategorias();
-  
+  const { uploadImage, isUploading } = useProductos();
+
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const url = await uploadImage(file);
+      setValue("imagen", url, { shouldValidate: true });
+      toast.success("¡Imagen subida con éxito a Cloudinary!");
+    } catch (error) {
+      console.error(error);
+      toast.error("Error al subir la imagen a Cloudinary.");
+    }
+  };
+
   const {
     register,
     handleSubmit,
@@ -39,11 +56,8 @@ export function ProductoModal({ isOpen, onOpenChange, onSubmit, producto }: Prod
       marca: "",
       categoria: "Unisex",
       categoriaId: "",
-      variante: "",
       familiaOlfativa: "",
-      ocasion: "",
       volumen: "",
-      tipo: "",
       anio: "",
       codigo: "",
       precioTienda: undefined,
@@ -62,11 +76,8 @@ export function ProductoModal({ isOpen, onOpenChange, onSubmit, producto }: Prod
         marca: producto.marca || "",
         categoria: producto.categoria || "Unisex",
         categoriaId: producto.categoriaId || "",
-        variante: producto.variante || "",
         familiaOlfativa: producto.familiaOlfativa || "",
-        ocasion: producto.ocasion || "",
         volumen: producto.volumen || "",
-        tipo: producto.tipo || "",
         anio: producto.anio || "",
         codigo: producto.codigo || "",
         precioTienda: producto.precioTienda,
@@ -79,11 +90,8 @@ export function ProductoModal({ isOpen, onOpenChange, onSubmit, producto }: Prod
         marca: "",
         categoria: "Unisex",
         categoriaId: "",
-        variante: "",
         familiaOlfativa: "",
-        ocasion: "",
         volumen: "",
-        tipo: "",
         anio: "",
         codigo: "",
         precioTienda: undefined,
@@ -196,18 +204,6 @@ export function ProductoModal({ isOpen, onOpenChange, onSubmit, producto }: Prod
                   {errors.categoriaId && <p className="text-danger text-tiny mt-1 ml-1">{errors.categoriaId.message}</p>}
                 </Select>
 
-                <TextField isInvalid={!!errors.variante}>
-                  <Label className="text-primary font-bold mb-1 ml-1 text-sm">Variante / Subnombre</Label>
-                  <InputGroup className="bg-primary/5 border-primary/10 hover:border-primary/20 focus-within:!border-primary rounded-xl h-11 transition-all">
-                    <InputGroup.Input
-                      placeholder="Ej. HAPPY SMILE"
-                      {...register("variante")}
-                      className="px-3 text-sm font-medium"
-                    />
-                  </InputGroup>
-                  {errors.variante && <p className="text-danger text-tiny mt-1 ml-1">{errors.variante.message}</p>}
-                </TextField>
-
                 <TextField isInvalid={!!errors.familiaOlfativa}>
                   <Label className="text-primary font-bold mb-1 ml-1 text-sm">Familia Olfativa</Label>
                   <InputGroup className="bg-primary/5 border-primary/10 hover:border-primary/20 focus-within:!border-primary rounded-xl h-11 transition-all">
@@ -220,18 +216,6 @@ export function ProductoModal({ isOpen, onOpenChange, onSubmit, producto }: Prod
                   {errors.familiaOlfativa && <p className="text-danger text-tiny mt-1 ml-1">{errors.familiaOlfativa.message}</p>}
                 </TextField>
 
-                <TextField isInvalid={!!errors.ocasion}>
-                  <Label className="text-primary font-bold mb-1 ml-1 text-sm">Ocasión</Label>
-                  <InputGroup className="bg-primary/5 border-primary/10 hover:border-primary/20 focus-within:!border-primary rounded-xl h-11 transition-all">
-                    <InputGroup.Input
-                      placeholder="Ej. CASUAL"
-                      {...register("ocasion")}
-                      className="px-3 text-sm font-medium"
-                    />
-                  </InputGroup>
-                  {errors.ocasion && <p className="text-danger text-tiny mt-1 ml-1">{errors.ocasion.message}</p>}
-                </TextField>
-
                 <TextField isInvalid={!!errors.volumen}>
                   <Label className="text-primary font-bold mb-1 ml-1 text-sm">Volumen</Label>
                   <InputGroup className="bg-primary/5 border-primary/10 hover:border-primary/20 focus-within:!border-primary rounded-xl h-11 transition-all">
@@ -242,18 +226,6 @@ export function ProductoModal({ isOpen, onOpenChange, onSubmit, producto }: Prod
                     />
                   </InputGroup>
                   {errors.volumen && <p className="text-danger text-tiny mt-1 ml-1">{errors.volumen.message}</p>}
-                </TextField>
-
-                <TextField isInvalid={!!errors.tipo}>
-                  <Label className="text-primary font-bold mb-1 ml-1 text-sm">Tipo</Label>
-                  <InputGroup className="bg-primary/5 border-primary/10 hover:border-primary/20 focus-within:!border-primary rounded-xl h-11 transition-all">
-                    <InputGroup.Input
-                      placeholder="Ej. EDT, EDP"
-                      {...register("tipo")}
-                      className="px-3 text-sm font-medium"
-                    />
-                  </InputGroup>
-                  {errors.tipo && <p className="text-danger text-tiny mt-1 ml-1">{errors.tipo.message}</p>}
                 </TextField>
 
                 <TextField isInvalid={!!errors.anio}>
@@ -293,17 +265,45 @@ export function ProductoModal({ isOpen, onOpenChange, onSubmit, producto }: Prod
                   {errors.precioTienda && <p className="text-danger text-tiny mt-1 ml-1">{errors.precioTienda.message}</p>}
                 </TextField>
 
-                <TextField isInvalid={!!errors.imagen}>
-                  <Label className="text-primary font-bold mb-1 ml-1 text-sm">URL de Imagen</Label>
-                  <InputGroup className="bg-primary/5 border-primary/10 hover:border-primary/20 focus-within:!border-primary rounded-xl h-11 transition-all">
-                    <InputGroup.Input
-                      placeholder="Ej. /sauvage.png"
-                      {...register("imagen")}
-                      className="px-3 text-sm font-medium"
-                    />
-                  </InputGroup>
+                <div className="flex flex-col gap-2">
+                  <Label className="text-primary font-bold mb-1 ml-1 text-sm">Imagen del Producto</Label>
+                  <div className="flex items-center gap-4">
+                    <label className="flex items-center gap-2 px-4 py-3 bg-primary/10 hover:bg-primary/20 text-primary font-bold rounded-xl transition-all cursor-pointer border border-primary/20 text-sm">
+                      <Upload size={16} />
+                      {isUploading ? "Subiendo..." : "Subir Archivo"}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageChange}
+                        disabled={isUploading}
+                        className="hidden"
+                      />
+                    </label>
+                    
+                    {watch("imagen") ? (
+                      <div className="flex items-center gap-2">
+                        <div className="w-12 h-12 rounded-xl bg-default-100 border border-default-200 overflow-hidden flex items-center justify-center">
+                          <img
+                            src={watch("imagen")}
+                            alt="Vista previa"
+                            className="w-full h-full object-contain"
+                          />
+                        </div>
+                        <span className="text-xs text-default-500 max-w-[150px] truncate">
+                          Imagen cargada
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2 text-default-400">
+                        <div className="w-12 h-12 rounded-xl bg-default-50 border border-dashed border-default-300 flex items-center justify-center">
+                          <ImageIcon size={20} />
+                        </div>
+                        <span className="text-xs">Sin imagen cargada</span>
+                      </div>
+                    )}
+                  </div>
                   {errors.imagen && <p className="text-danger text-tiny mt-1 ml-1">{errors.imagen.message}</p>}
-                </TextField>
+                </div>
               </div>
 
               <TextField isInvalid={!!errors.notas}>

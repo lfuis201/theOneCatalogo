@@ -1,4 +1,4 @@
-export type RolUsuario = 'admin' | 'cliente' | 'staff';
+export type RolUsuario = 'superadmin' | 'admin' | 'cliente' | 'staff';
 
 export interface Usuario {
   id: string;
@@ -8,6 +8,7 @@ export interface Usuario {
   empresa?: string;
   rol: RolUsuario;
   status: 'active' | 'inactive';
+  limite_licencias?: number;
   created_at: string;
   updated_at: string;
 }

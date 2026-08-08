@@ -5,11 +5,8 @@ export const productoSchema = z.object({
   marca: z.string().min(2, "La marca debe tener al menos 2 caracteres"),
   categoria: z.enum(["Dama", "Caballero", "Unisex", "Todos"]),
   categoriaId: z.string().optional().nullable(),
-  variante: z.string().optional(),
   familiaOlfativa: z.string().min(2, "La familia olfativa es requerida"),
-  ocasion: z.string().optional(),
   volumen: z.string().min(1, "El volumen es requerido"),
-  tipo: z.string().min(1, "El tipo es requerido"),
   anio: z.string().optional(),
   codigo: z.string().optional(),
   precioTienda: z.preprocess(
@@ -21,3 +18,4 @@ export const productoSchema = z.object({
 });
 
 export type ProductoFormValues = z.infer<typeof productoSchema>;
+

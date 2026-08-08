@@ -7,13 +7,10 @@ export type Producto = {
   anio?: string; // Year
   codigo?: string; // Code (e.g. #6679)
   imagen?: string; // Image URL
-  variante?: string;
   familiaOlfativa: string;
   notas: string;
-  ocasion?: string;
   volumen: string;
-  tipo: string;
   precioTienda: number;
-  status: 'active' | 'inactive';
   created_at: string;
 };
+

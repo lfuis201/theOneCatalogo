@@ -203,7 +203,7 @@ export default function SuscripcionesPage() {
         <div className="space-y-1">
           <h1 className="text-4xl font-black tracking-tight text-default-900 flex items-center gap-3">
             <CreditCard className="text-primary" size={32} />
-            Suscripciones
+            Licencias
           </h1>
           <p className="text-default-500 font-medium">Gestión del Club de Perfumes y suscripciones de decants mensuales.</p>
         </div>

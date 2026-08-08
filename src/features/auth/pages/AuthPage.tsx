@@ -17,7 +17,15 @@ export function AuthPage() {
   }
 
   if (user) {
-    if (profile && profile.rol !== 'admin') {
+    if (!profile) {
+      return (
+        <div className="h-screen w-full flex flex-col items-center justify-center bg-white gap-4">
+          <Spinner size="lg" color="primary" />
+          <p className="text-primary/70 font-medium animate-pulse">Cargando perfil...</p>
+        </div>
+      );
+    }
+    if (profile.rol !== 'admin' && profile.rol !== 'superadmin') {
       return <Navigate to="/" replace />;
     }
     return <Navigate to="/dashboard" replace />;

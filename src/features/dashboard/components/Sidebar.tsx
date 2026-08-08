@@ -7,6 +7,8 @@ import {
   Package,
   CreditCard,
   Tag,
+  ShieldAlert,
+  Building,
 } from "lucide-react";
 import { useLocation, Link } from "react-router-dom";
 import { useAuth } from "../../auth/hooks/useAuth";
@@ -26,6 +28,12 @@ export function Sidebar() {
 
   const adminItems = [
     { path: "/configuracion", label: "Configuración", icon: <Settings size={20} /> },
+    ...(role === 'superadmin' ? [
+      { path: "/superadmin", label: "Admins", icon: <ShieldAlert size={20} /> },
+      { path: "/superadmin/empresas", label: "Empresas", icon: <Building size={20} /> },
+      { path: "/superadmin/productos", label: "Prod. Globales", icon: <Package size={20} /> },
+      { path: "/superadmin/suscripciones", label: "Lic. Globales", icon: <CreditCard size={20} /> }
+    ] : []),
   ];
 
   return (
@@ -60,7 +68,7 @@ export function Sidebar() {
           </div>
         </div>
 
-        {role === 'admin' && (
+        {(role === 'admin' || role === 'superadmin') && (
           <div>
             <p className="px-2 text-tiny font-bold text-zinc-500 uppercase tracking-widest mb-4">Administración</p>
             <div className="space-y-1">

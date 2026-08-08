@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button, Card } from "@heroui/react";
+import { Button, Card, toast } from "@heroui/react";
 import { Plus, Package } from "lucide-react";
 import { ProductosTable } from "../components/ProductosTable";
 import { ProductoModal } from "../components/ProductoModal";
@@ -43,11 +43,14 @@ export default function ProductosPage() {
     try {
       if (editingProducto) {
         await updateProducto({ id: editingProducto.id, data });
+        toast.success("¡Perfume actualizado con éxito!");
       } else {
         await createProducto(data);
+        toast.success("¡Perfume creado con éxito!");
       }
     } catch (err) {
       console.error("Error guardando producto:", err);
+      toast.error("Ocurrió un error al guardar el perfume.");
     }
   };
 
@@ -55,8 +58,10 @@ export default function ProductosPage() {
     if (window.confirm("¿Estás seguro de que deseas eliminar este producto?")) {
       try {
         await deleteProducto(id);
+        toast.success("¡Perfume eliminado con éxito!");
       } catch (err) {
         console.error("Error eliminando producto:", err);
+        toast.error("Ocurrió un error al eliminar el perfume.");
       }
     }
   };
@@ -100,9 +105,9 @@ export default function ProductosPage() {
           </p>
         </Card>
         <Card className="p-4 border-none shadow-xl shadow-primary/5 rounded-[2rem] bg-white">
-          <p className="text-sm font-bold text-default-400 uppercase tracking-wider mb-1">Activos</p>
+          <p className="text-sm font-bold text-default-400 uppercase tracking-wider mb-1">Dama / Caballero</p>
           <p className="text-3xl font-black text-success">
-            {isLoading ? "..." : safeProductos.filter(p => p.status === 'active').length}
+            {isLoading ? "..." : `${safeProductos.filter(p => p.categoria === 'Dama').length} / ${safeProductos.filter(p => p.categoria === 'Caballero').length}`}
           </p>
         </Card>
         <Card className="p-4 border-none shadow-xl shadow-primary/5 rounded-[2rem] bg-white">

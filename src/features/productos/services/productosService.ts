@@ -11,14 +11,10 @@ export function mapRowToProducto(row: any): Producto {
     anio: row.year || undefined,
     codigo: row.code || undefined,
     imagen: row.image || undefined,
-    variante: row.variante || undefined,
     familiaOlfativa: row.family,
     notas: row.notes,
-    ocasion: row.ocasion || undefined,
     volumen: row.volume,
-    tipo: row.tipo,
     precioTienda: Number(row.price),
-    status: row.status || 'active',
     created_at: row.created_at,
   };
 }
@@ -32,14 +28,10 @@ export function mapProductoToRow(producto: Partial<Producto>): any {
   if (producto.anio !== undefined) row.year = producto.anio;
   if (producto.codigo !== undefined) row.code = producto.codigo;
   if (producto.imagen !== undefined) row.image = producto.imagen;
-  if (producto.variante !== undefined) row.variante = producto.variante;
   if (producto.familiaOlfativa !== undefined) row.family = producto.familiaOlfativa;
-  if (producto.notes !== undefined) row.notes = producto.notes;
-  if (producto.ocasion !== undefined) row.ocasion = producto.ocasion;
+  if (producto.notas !== undefined) row.notes = producto.notas;
   if (producto.volumen !== undefined) row.volume = producto.volumen;
-  if (producto.tipo !== undefined) row.tipo = producto.tipo;
   if (producto.precioTienda !== undefined) row.price = producto.precioTienda;
-  if (producto.status !== undefined) row.status = producto.status;
   return row;
 }
 

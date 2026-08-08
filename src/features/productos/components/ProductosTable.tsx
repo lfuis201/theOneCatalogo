@@ -23,7 +23,6 @@ export function ProductosTable({ productos, isLoading, onViewFicha, onEdit, onDe
     { name: "Detalles", id: "detalles" },
     { name: "Categoría", id: "categoria" },
     { name: "Precio", id: "precio" },
-    { name: "Estado", id: "status" },
     { name: "Acciones", id: "actions" },
   ];
 
@@ -34,14 +33,13 @@ export function ProductosTable({ productos, isLoading, onViewFicha, onEdit, onDe
           <div className="flex flex-col">
             <span className="text-[10px] uppercase font-black tracking-wider text-primary/70">{producto.marca}</span>
             <span className="text-sm font-bold text-default-900">{producto.nombre}</span>
-            {producto.variante && <span className="text-tiny text-default-400">{producto.variante}</span>}
           </div>
         );
       case "detalles":
         return (
           <div className="flex flex-col">
             <p className="text-bold text-sm capitalize text-default-700">{producto.familiaOlfativa}</p>
-            <p className="text-bold text-tiny text-default-400">{producto.volumen} {producto.tipo}</p>
+            <p className="text-bold text-tiny text-default-400">{producto.volumen}</p>
           </div>
         );
       case "categoria":
@@ -67,17 +65,7 @@ export function ProductosTable({ productos, isLoading, onViewFicha, onEdit, onDe
             ${producto.precioTienda.toFixed(2)}
           </span>
         );
-      case "status":
-        return (
-          <Chip
-            className="capitalize border-none gap-1 text-default-600"
-            color={producto.status === "active" ? "success" : "danger"}
-            size="sm"
-            variant="flat"
-          >
-            {producto.status === "active" ? "Activo" : "Inactivo"}
-          </Chip>
-        );
+
       case "actions":
         return (
           <div className="relative flex items-center gap-2">
@@ -130,7 +118,6 @@ export function ProductosTable({ productos, isLoading, onViewFicha, onEdit, onDe
             <Table.Column>Detalles</Table.Column>
             <Table.Column>Categoría</Table.Column>
             <Table.Column>Precio</Table.Column>
-            <Table.Column>Estado</Table.Column>
             <Table.Column>Acciones</Table.Column>
           </Table.Header>
           <Table.Body>
@@ -156,9 +143,6 @@ export function ProductosTable({ productos, isLoading, onViewFicha, onEdit, onDe
                     <Skeleton className="h-4 w-12 rounded-lg" />
                   </Table.Cell>
                   <Table.Cell>
-                    <Skeleton className="h-6 w-16 rounded-full" />
-                  </Table.Cell>
-                  <Table.Cell>
                     <div className="flex gap-2">
                       <Skeleton className="h-8 w-8 rounded-lg" />
                       <Skeleton className="h-8 w-8 rounded-lg" />
@@ -174,7 +158,6 @@ export function ProductosTable({ productos, isLoading, onViewFicha, onEdit, onDe
                   <Table.Cell>{renderCell(item, "detalles")}</Table.Cell>
                   <Table.Cell>{renderCell(item, "categoria")}</Table.Cell>
                   <Table.Cell>{renderCell(item, "precio")}</Table.Cell>
-                  <Table.Cell>{renderCell(item, "status")}</Table.Cell>
                   <Table.Cell>{renderCell(item, "actions")}</Table.Cell>
                 </Table.Row>
               ))
