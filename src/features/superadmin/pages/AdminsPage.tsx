@@ -1,9 +1,11 @@
 import { useState } from "react";
-import { Button, Card } from "@heroui/react";
+import { Button, Card, toast } from "@heroui/react";
 import { Plus, ShieldAlert } from "lucide-react";
 import { AdminsTable } from "../components/AdminsTable";
 import { AdminModal } from "../components/AdminModal";
 import { useAdmins } from "../hooks/useAdmins";
+import { useEmpresas } from "../hooks/useEmpresas";
+import { empresasService } from "../services/empresasService";
 import type { AdminUser } from "../types";
 
 export default function AdminsPage() {
@@ -16,6 +18,8 @@ export default function AdminsPage() {
     updateAdmin, 
     deleteAdmin 
   } = useAdmins();
+
+  const { empresas } = useEmpresas();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingAdmin, setEditingAdmin] = useState<AdminUser | null>(null);
@@ -37,15 +41,52 @@ export default function AdminsPage() {
     setIsModalOpen(true);
   };
 
+  const [isSaving, setIsSaving] = useState(false);
+
   const handleFormSubmit = async (data: any) => {
+    setIsSaving(true);
     try {
-      if (editingAdmin) {
-        await updateAdmin({ id: editingAdmin.id, data });
-      } else {
-        await createAdmin(data);
+      let finalEmpresaId = data.empresa_id || null;
+      let finalEmpresaNombre = null;
+
+      if (data.tipo_empresa === "crear" && data.empresa_nueva_nombre) {
+        const newEmp = await empresasService.create({
+          nombre: data.empresa_nueva_nombre,
+          status: "active",
+        });
+        finalEmpresaId = newEmp.id;
+        finalEmpresaNombre = newEmp.nombre;
+      } else if (data.tipo_empresa === "asignar" && data.empresa_id) {
+        finalEmpresaId = data.empresa_id;
+        const matchedEmpresa = empresas.find(e => e.id === data.empresa_id);
+        finalEmpresaNombre = matchedEmpresa ? matchedEmpresa.nombre : null;
       }
-    } catch (err) {
+
+      const adminPayload = {
+        nombre: data.nombre,
+        email: data.email,
+        telefono: data.telefono,
+        empresa: finalEmpresaNombre,
+        empresa_id: finalEmpresaId,
+        status: data.status,
+        plan_suscripcion: data.plan_suscripcion,
+        limite_licencias: data.limite_licencias,
+        password: data.password,
+      };
+
+      if (editingAdmin) {
+        await updateAdmin({ id: editingAdmin.id, data: adminPayload });
+        toast.success("¡Administrador actualizado con éxito!");
+      } else {
+        await createAdmin(adminPayload);
+        toast.success("¡Administrador registrado con éxito!");
+      }
+      setIsModalOpen(false);
+    } catch (err: any) {
       console.error("Error guardando administrador:", err);
+      toast.error(err.message || "Ocurrió un error al guardar el administrador.");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -123,6 +164,7 @@ export default function AdminsPage() {
           onOpenChange={handleOpenChange} 
           onSubmit={handleFormSubmit} 
           admin={editingAdmin}
+          isLoading={isSaving}
         />
       )}
     </div>

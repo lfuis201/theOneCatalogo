@@ -1,17 +1,22 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { categoriasService } from '../services/categoriasService';
 import type { Categoria } from '../types';
+import { useAuth } from '../../auth/hooks/useAuth';
 
 export function useCategorias() {
   const queryClient = useQueryClient();
+  const { profile } = useAuth();
+
+  const empresaId = profile?.empresa_id;
+  const isSuperAdmin = profile?.rol === 'superadmin';
 
   const categoriasQuery = useQuery({
-    queryKey: ['categorias'],
-    queryFn: categoriasService.getAll,
+    queryKey: ['categorias', empresaId, isSuperAdmin],
+    queryFn: () => categoriasService.getAll(empresaId, isSuperAdmin),
   });
 
   const createCategoriaMutation = useMutation({
-    mutationFn: (newCat: Partial<Categoria>) => categoriasService.create(newCat),
+    mutationFn: (newCat: Partial<Categoria>) => categoriasService.create(newCat, empresaId),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['categorias'] });
     },

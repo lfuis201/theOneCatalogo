@@ -1,17 +1,22 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { clientesService } from '../services/clientesService';
 import type { Cliente } from '../types';
+import { useAuth } from '../../auth/hooks/useAuth';
 
 export function useClientes() {
   const queryClient = useQueryClient();
+  const { profile } = useAuth();
+
+  const empresaId = profile?.empresa_id;
+  const isSuperAdmin = profile?.rol === 'superadmin';
 
   const clientesQuery = useQuery({
-    queryKey: ['clientes'],
-    queryFn: clientesService.getAll,
+    queryKey: ['clientes', empresaId, isSuperAdmin],
+    queryFn: () => clientesService.getAll(empresaId, isSuperAdmin),
   });
 
   const createClienteMutation = useMutation({
-    mutationFn: (newCliente: Partial<Cliente> & { password?: string }) => clientesService.create(newCliente),
+    mutationFn: (newCliente: Partial<Cliente> & { password?: string }) => clientesService.create(newCliente, empresaId),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['clientes'] });
     },

@@ -30,9 +30,24 @@ export function ProductosTable({ productos, isLoading, onViewFicha, onEdit, onDe
     switch (columnKey) {
       case "nombre":
         return (
-          <div className="flex flex-col">
-            <span className="text-[10px] uppercase font-black tracking-wider text-primary/70">{producto.marca}</span>
-            <span className="text-sm font-bold text-default-900">{producto.nombre}</span>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-default-100 border border-default-200 overflow-hidden flex items-center justify-center shrink-0">
+              {producto.imagen ? (
+                <img
+                  src={producto.imagen}
+                  alt={producto.nombre}
+                  className="w-full h-full object-contain"
+                />
+              ) : (
+                <span className="text-xs font-black text-default-400">
+                  {producto.nombre.charAt(0).toUpperCase()}
+                </span>
+              )}
+            </div>
+            <div className="flex flex-col">
+              <span className="text-[10px] uppercase font-black tracking-wider text-primary/70">{producto.marca}</span>
+              <span className="text-sm font-bold text-default-900">{producto.nombre}</span>
+            </div>
           </div>
         );
       case "detalles":

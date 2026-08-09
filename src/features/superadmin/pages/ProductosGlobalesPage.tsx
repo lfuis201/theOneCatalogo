@@ -1,9 +1,38 @@
+import { useState, useMemo } from "react";
 import { useGlobalProducts } from "../hooks/useGlobalProducts";
-import { Table, Button, Tooltip, Card } from "@heroui/react";
-import { Trash2, Package, Tag } from "lucide-react";
+import { useEmpresas } from "../hooks/useEmpresas";
+import { Table, Button, Tooltip, Card, Select, ListBox, TextField, InputGroup } from "@heroui/react";
+import { Trash2, Package, Search, Filter } from "lucide-react";
 
 export default function ProductosGlobalesPage() {
   const { products, isLoading, isError, deleteProduct } = useGlobalProducts();
+  const { empresas } = useEmpresas();
+
+  const [selectedEmpresa, setSelectedEmpresa] = useState<string>("todas");
+  const [searchTerm, setSearchTerm] = useState<string>("");
+
+  const getSingleKey = (selection: any): string => {
+    if (selection instanceof Set || (selection && typeof selection === 'object' && Symbol.iterator in selection)) {
+      return Array.from(selection)[0] as string;
+    }
+    return selection as string;
+  };
+
+  const filteredProducts = useMemo(() => {
+    return products.filter((p) => {
+      const matchesEmpresa =
+        selectedEmpresa === "todas" ||
+        p.adminEmpresa === selectedEmpresa ||
+        (selectedEmpresa === "Particular" && (p.adminEmpresa === "Particular" || p.adminEmpresa === "Plataforma"));
+
+      const matchesSearch =
+        p.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        p.marca.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        p.categoria.toLowerCase().includes(searchTerm.toLowerCase());
+
+      return matchesEmpresa && matchesSearch;
+    });
+  }, [products, selectedEmpresa, searchTerm]);
 
   const handleDeleteProduct = async (id: string) => {
     if (window.confirm("¿Estás seguro de que deseas eliminar este producto globalmente?")) {
@@ -46,13 +75,51 @@ export default function ProductosGlobalesPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card className="p-4 border-none shadow-xl shadow-primary/5 rounded-[2rem] bg-white">
-          <p className="text-sm font-bold text-default-400 uppercase tracking-wider mb-1">Total de Productos en Plataforma</p>
-          <p className="text-3xl font-black text-default-900">{products.length}</p>
+          <p className="text-sm font-bold text-default-400 uppercase tracking-wider mb-1">Total de Productos Filtrados</p>
+          <p className="text-3xl font-black text-default-900">{filteredProducts.length}</p>
         </Card>
         <Card className="p-4 border-none shadow-xl shadow-primary/5 rounded-[2rem] bg-white">
           <p className="text-sm font-bold text-default-400 uppercase tracking-wider mb-1">Categoría Principal</p>
           <p className="text-3xl font-black text-primary">Perfumería B2B</p>
         </Card>
+      </div>
+
+      {/* Controles de Filtros */}
+      <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-white p-4 rounded-2xl shadow-sm border border-default-100">
+        <div className="w-full md:w-72">
+          <InputGroup className="bg-primary/5 border-primary/10 rounded-xl h-11">
+            <InputGroup.Prefix className="pl-3 text-primary/40"><Search size={18} /></InputGroup.Prefix>
+            <InputGroup.Input
+              placeholder="Buscar producto, marca..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="px-3 text-sm font-medium"
+            />
+          </InputGroup>
+        </div>
+
+        <div className="w-full md:w-72 flex items-center gap-2">
+          <Filter size={18} className="text-primary/60" />
+          <Select
+            selectedKey={selectedEmpresa}
+            onSelectionChange={(keys) => setSelectedEmpresa(getSingleKey(keys))}
+            className="w-full"
+          >
+            <Select.Trigger className="bg-primary/5 border-primary/10 rounded-xl h-11">
+              <Select.Value className="text-sm font-medium" />
+            </Select.Trigger>
+            <Select.Popover>
+              <ListBox>
+                <ListBox.Item id="todas" textValue="Todas las Empresas">Todas las Empresas <ListBox.ItemIndicator /></ListBox.Item>
+                {empresas.map((emp) => (
+                  <ListBox.Item key={emp.id} id={emp.nombre} textValue={emp.nombre}>
+                    {emp.nombre} <ListBox.ItemIndicator />
+                  </ListBox.Item>
+                ))}
+              </ListBox>
+            </Select.Popover>
+          </Select>
+        </div>
       </div>
 
       <Table>
@@ -66,7 +133,7 @@ export default function ProductosGlobalesPage() {
               <Table.Column>Acciones</Table.Column>
             </Table.Header>
             <Table.Body>
-              {products.map((item) => (
+              {filteredProducts.map((item) => (
                 <Table.Row key={item.id} id={item.id}>
                   <Table.Cell>
                     <div className="flex flex-col">

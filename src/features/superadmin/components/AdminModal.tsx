@@ -13,16 +13,19 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { User, Mail, Phone, Building, Key, Eye, EyeOff, Hash } from "lucide-react";
 import type { AdminUser } from "../types";
 import { getAdminSchema, type AdminFormValues } from "../schemas/adminSchema";
+import { useEmpresas } from "../hooks/useEmpresas";
 
 interface AdminModalProps {
   isOpen: boolean;
   onOpenChange: () => void;
   onSubmit: (data: AdminFormValues) => void;
   admin?: AdminUser | null;
+  isLoading?: boolean;
 }
 
-export function AdminModal({ isOpen, onOpenChange, onSubmit, admin }: AdminModalProps) {
+export function AdminModal({ isOpen, onOpenChange, onSubmit, admin, isLoading }: AdminModalProps) {
   const [showPassword, setShowPassword] = useState(false);
+  const { empresas } = useEmpresas();
 
   const {
     register,
@@ -38,43 +41,71 @@ export function AdminModal({ isOpen, onOpenChange, onSubmit, admin }: AdminModal
       email: "",
       telefono: "",
       empresa: "",
+      tipo_empresa: "ninguno",
+      empresa_id: "",
+      empresa_nueva_nombre: "",
       status: "active",
-      limite_licencias: 10,
+      plan_suscripcion: "ninguno",
+      limite_licencias: 50,
       password: "",
     },
   });
 
   const selectedStatus = watch("status");
+  const tipoEmpresa = watch("tipo_empresa");
+  const selectedEmpresaId = watch("empresa_id");
+  const planSuscripcion = watch("plan_suscripcion");
 
   useEffect(() => {
-    if (admin && isOpen) {
-      reset({
-        nombre: admin.nombre || "",
-        email: admin.email || "",
-        telefono: admin.telefono || "",
-        empresa: admin.empresa || "",
-        status: admin.status || "active",
-        limite_licencias: admin.limite_licencias ?? 10,
-        password: "",
-      });
-    } else if (isOpen) {
-      reset({
-        nombre: "",
-        email: "",
-        telefono: "",
-        empresa: "",
-        status: "active",
-        limite_licencias: 10,
-        password: "",
-      });
+    if (isOpen) {
+      if (admin) {
+        const activePlan = admin.plan_activo === "VIP Gold Perfumer" 
+          ? "gold" 
+          : admin.plan_activo === "Silver Collector" 
+            ? "silver" 
+            : "ninguno";
+
+        reset({
+          nombre: admin.nombre || "",
+          email: admin.email || "",
+          telefono: admin.telefono || "",
+          empresa: admin.empresa || "",
+          tipo_empresa: admin.empresa_id ? "asignar" : (admin.empresa ? "crear" : "ninguno"),
+          empresa_id: admin.empresa_id || "",
+          empresa_nueva_nombre: admin.empresa_id ? "" : (admin.empresa || ""),
+          status: admin.status || "active",
+          plan_suscripcion: activePlan,
+          limite_licencias: admin.limite_licencias ?? 50,
+          password: "",
+        });
+      } else {
+        reset({
+          nombre: "",
+          email: "",
+          telefono: "",
+          empresa: "",
+          tipo_empresa: "ninguno",
+          empresa_id: "",
+          empresa_nueva_nombre: "",
+          status: "active",
+          plan_suscripcion: "ninguno",
+          limite_licencias: 50,
+          password: "",
+        });
+      }
+      setShowPassword(false);
     }
-    setShowPassword(false);
-  }, [admin, isOpen, reset]);
+  }, [isOpen, admin, reset]);
 
   const handleFormSubmit = (data: AdminFormValues) => {
     onSubmit(data);
-    reset();
-    onOpenChange();
+  };
+
+  const getSingleKey = (selection: any): string => {
+    if (selection instanceof Set || (selection && typeof selection === 'object' && Symbol.iterator in selection)) {
+      return Array.from(selection)[0] as string;
+    }
+    return selection as string;
   };
 
   return (
@@ -100,6 +131,7 @@ export function AdminModal({ isOpen, onOpenChange, onSubmit, admin }: AdminModal
                     <InputGroup.Input 
                       placeholder="Ej. Carlos Mendoza"
                       {...register("nombre")}
+                      value={watch("nombre") || ""}
                       className="px-3 text-sm font-medium"
                     />
                   </InputGroup>
@@ -113,6 +145,7 @@ export function AdminModal({ isOpen, onOpenChange, onSubmit, admin }: AdminModal
                     <InputGroup.Input 
                       placeholder="admin@empresa.com"
                       {...register("email")}
+                      value={watch("email") || ""}
                       className="px-3 text-sm font-medium"
                       disabled={!!admin}
                     />
@@ -128,6 +161,7 @@ export function AdminModal({ isOpen, onOpenChange, onSubmit, admin }: AdminModal
                         type={showPassword ? "text" : "password"}
                         placeholder="Mínimo 6 caracteres"
                         {...register("password")}
+                        value={watch("password") || ""}
                         className="px-3 text-sm font-medium"
                       />
                       <InputGroup.Suffix className="pr-2">
@@ -153,45 +187,112 @@ export function AdminModal({ isOpen, onOpenChange, onSubmit, admin }: AdminModal
                     <InputGroup.Input 
                       placeholder="Ej. +56 9 8765 4321"
                       {...register("telefono")}
+                      value={watch("telefono") || ""}
                       className="px-3 text-sm font-medium"
                     />
                   </InputGroup>
                   {errors.telefono && <p className="text-danger text-tiny mt-1 ml-1">{errors.telefono.message}</p>}
                 </TextField>
 
-                <TextField isInvalid={!!errors.empresa}>
-                  <Label className="text-primary font-bold mb-1 ml-1 text-sm">Empresa / Nombre de Tienda</Label>
-                  <InputGroup className="bg-primary/5 border-primary/10 hover:border-primary/20 focus-within:!border-primary rounded-xl h-11 transition-all">
-                    <InputGroup.Prefix className="pl-3 text-primary/40"><Building size={18} /></InputGroup.Prefix>
-                    <InputGroup.Input 
-                      placeholder="Ej. Perfumes Importados SAC"
-                      {...register("empresa")}
-                      className="px-3 text-sm font-medium"
-                    />
-                  </InputGroup>
-                  {errors.empresa && <p className="text-danger text-tiny mt-1 ml-1">{errors.empresa.message}</p>}
-                </TextField>
+                <div className="flex flex-col">
+                  <Label className="text-primary font-bold mb-1 ml-1 text-sm">Configuración B2B / Empresa</Label>
+                  <Select
+                    selectedKey={tipoEmpresa}
+                    onSelectionChange={(keys) => {
+                      const key = getSingleKey(keys);
+                      setValue("tipo_empresa", key as any);
+                      if (key === "ninguno") {
+                        setValue("empresa_id", "");
+                        setValue("empresa_nueva_nombre", "");
+                      } else if (key === "crear") {
+                        setValue("empresa_id", "");
+                      } else if (key === "asignar") {
+                        setValue("empresa_nueva_nombre", "");
+                      }
+                    }}
+                    className="w-full"
+                  >
+                    <Select.Trigger className="bg-primary/5 border-primary/10 hover:border-primary/20 focus-within:!border-primary rounded-xl h-11 transition-all shadow-sm">
+                      <Select.Value className="text-sm font-medium" />
+                    </Select.Trigger>
+                    <Select.Popover>
+                      <ListBox>
+                        <ListBox.Item id="ninguno" textValue="Sin Empresa B2B (Particular)">Sin Empresa B2B (Particular) <ListBox.ItemIndicator /></ListBox.Item>
+                        <ListBox.Item id="crear" textValue="Crear Nueva Empresa B2B">Crear Nueva Empresa B2B <ListBox.ItemIndicator /></ListBox.Item>
+                        <ListBox.Item id="asignar" textValue="Asignar Empresa B2B Existente">Asignar Empresa B2B Existente <ListBox.ItemIndicator /></ListBox.Item>
+                      </ListBox>
+                    </Select.Popover>
+                  </Select>
+                </div>
 
-                <TextField isInvalid={!!errors.limite_licencias}>
-                  <Label className="text-primary font-bold mb-1 ml-1 text-sm">Límite de Licencias / Suscripciones</Label>
-                  <InputGroup className="bg-primary/5 border-primary/10 hover:border-primary/20 focus-within:!border-primary rounded-xl h-11 transition-all">
-                    <InputGroup.Prefix className="pl-3 text-primary/40"><Hash size={18} /></InputGroup.Prefix>
-                    <InputGroup.Input 
-                      type="number"
-                      placeholder="Ej. 10"
-                      {...register("limite_licencias")}
-                      className="px-3 text-sm font-medium"
-                    />
-                  </InputGroup>
-                  {errors.limite_licencias && <p className="text-danger text-tiny mt-1 ml-1">{errors.limite_licencias.message}</p>}
-                </TextField>
-
+                {tipoEmpresa === "crear" && (
+                  <TextField isInvalid={!!errors.empresa_nueva_nombre}>
+                    <Label className="text-primary font-bold mb-1 ml-1 text-sm">Nombre de la Nueva Empresa</Label>
+                    <InputGroup className="bg-primary/5 border-primary/10 hover:border-primary/20 focus-within:!border-primary rounded-xl h-11 transition-all">
+                      <InputGroup.Prefix className="pl-3 text-primary/40"><Building size={18} /></InputGroup.Prefix>
+                      <InputGroup.Input 
+                        placeholder="Ej. Perfumes Importados SAC"
+                        {...register("empresa_nueva_nombre")}
+                        value={watch("empresa_nueva_nombre") || ""}
+                        className="px-3 text-sm font-medium"
+                      />
+                    </InputGroup>
+                    {errors.empresa_nueva_nombre && <p className="text-danger text-tiny mt-1 ml-1">{errors.empresa_nueva_nombre.message}</p>}
+                  </TextField>
+                )}
+ 
+                {tipoEmpresa === "asignar" && (
+                  <div className="flex flex-col">
+                    <Label className="text-primary font-bold mb-1 ml-1 text-sm">Seleccionar Empresa Existente</Label>
+                    <Select
+                      selectedKey={selectedEmpresaId}
+                      onSelectionChange={(keys) => setValue("empresa_id", getSingleKey(keys) as any)}
+                      className="w-full"
+                    >
+                      <Select.Trigger className="bg-primary/5 border-primary/10 hover:border-primary/20 focus-within:!border-primary rounded-xl h-11 transition-all shadow-sm">
+                        <Select.Value className="text-sm font-medium" />
+                      </Select.Trigger>
+                      <Select.Popover>
+                        <ListBox>
+                          {empresas.map((emp) => (
+                            <ListBox.Item key={emp.id} id={emp.id} textValue={emp.nombre}>
+                              {emp.nombre} <ListBox.ItemIndicator />
+                            </ListBox.Item>
+                          ))}
+                        </ListBox>
+                      </Select.Popover>
+                    </Select>
+                    {errors.empresa_nueva_nombre && <p className="text-danger text-tiny mt-1 ml-1">{errors.empresa_nueva_nombre.message}</p>}
+                  </div>
+                )}
+ 
+ 
+                <div className="flex flex-col">
+                  <Label className="text-primary font-bold mb-1 ml-1 text-sm">Plan de Suscripción</Label>
+                  <Select
+                    selectedKey={planSuscripcion}
+                    onSelectionChange={(keys) => setValue("plan_suscripcion", getSingleKey(keys) as any)}
+                    className="w-full"
+                  >
+                    <Select.Trigger className="bg-primary/5 border-primary/10 hover:border-primary/20 focus-within:!border-primary rounded-xl h-11 transition-all shadow-sm">
+                      <Select.Value className="text-sm font-medium" />
+                    </Select.Trigger>
+                    <Select.Popover>
+                      <ListBox>
+                        <ListBox.Item id="ninguno" textValue="Sin Suscripción">Sin Suscripción <ListBox.ItemIndicator /></ListBox.Item>
+                        <ListBox.Item id="silver" textValue="Plan Silver ($29/mes)">Plan Silver ($29/mes) <ListBox.ItemIndicator /></ListBox.Item>
+                        <ListBox.Item id="gold" textValue="Plan Gold ($49/mes)">Plan Gold ($49/mes) <ListBox.ItemIndicator /></ListBox.Item>
+                      </ListBox>
+                    </Select.Popover>
+                  </Select>
+                </div>
+ 
                 {admin && (
                   <div className="flex flex-col">
                     <Label className="text-primary font-bold mb-1 ml-1 text-sm">Estado del Administrador</Label>
                     <Select
                       selectedKey={selectedStatus}
-                      onSelectionChange={(key) => setValue("status", key as any)}
+                      onSelectionChange={(keys) => setValue("status", getSingleKey(keys) as any)}
                       className="w-full"
                     >
                       <Select.Trigger className="bg-primary/5 border-primary/10 hover:border-primary/20 focus-within:!border-primary rounded-xl h-11 transition-all shadow-sm">
@@ -214,12 +315,15 @@ export function AdminModal({ isOpen, onOpenChange, onSubmit, admin }: AdminModal
                 color="danger" 
                 onPress={() => onOpenChange()}
                 className="font-bold rounded-xl"
+                isDisabled={isLoading}
               >
                 Cancelar
               </Button>
               <Button 
                 type="submit"
                 className="bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/30"
+                isLoading={isLoading}
+                isDisabled={isLoading}
               >
                 {admin ? "Guardar Cambios" : "Guardar Administrador"}
               </Button>

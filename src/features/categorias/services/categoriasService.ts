@@ -2,20 +2,34 @@ import { supabase } from '../../../shared/lib/supabase';
 import type { Categoria } from '../types';
 
 export const categoriasService = {
-  async getAll(): Promise<Categoria[]> {
-    const { data, error } = await supabase
+  async getAll(empresaId?: string | null, isSuperAdmin?: boolean): Promise<Categoria[]> {
+    let query = supabase
       .from('categorias')
       .select('*')
       .order('nombre', { ascending: true });
 
+    if (!isSuperAdmin) {
+      if (empresaId) {
+        query = query.eq('empresa_id', empresaId);
+      } else {
+        query = query.is('empresa_id', null);
+      }
+    }
+
+    const { data, error } = await query;
     if (error) throw error;
     return data || [];
   },
 
-  async create(categoria: Partial<Categoria>): Promise<Categoria> {
+  async create(categoria: Partial<Categoria>, empresaId?: string | null): Promise<Categoria> {
+    const payload: any = { nombre: categoria.nombre };
+    if (empresaId !== undefined) {
+      payload.empresa_id = empresaId;
+    }
+
     const { data, error } = await supabase
       .from('categorias')
-      .insert({ nombre: categoria.nombre })
+      .insert(payload)
       .select()
       .single();
 

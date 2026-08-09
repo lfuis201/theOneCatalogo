@@ -10,43 +10,65 @@ export function PublicPlansPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   
-  const [loadingPurchase, setLoadingPurchase] = useState(false);
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [successPurchase, setSuccessPurchase] = useState(false);
 
-  const appProduct = {
-    name: "Catálogo Electrónico THE ONE",
-    price: "$29",
-    currency: "USD",
-    period: " / mes",
-    description: "La herramienta digital definitiva para consultores y vendedores de perfumería. Accede al catálogo, comparte fichas técnicas y cierra ventas ágilmente.",
-    features: [
-      "Uso completo Online y Offline (sin necesidad de internet)",
-      "Buscador Inteligente por notas, marcas y familias olfativas",
-      "Generación y envío de fichas técnicas ilimitadas a clientes",
-      "Precios de referencia departamentales integrados",
-      "Acceso inmediato en todos tus dispositivos",
-      "Botón de cotizaciones automáticas directo a WhatsApp"
-    ],
-    dbPlan: "Silver Collector", // Map to DB Enum
-    dbPrice: 29.00
-  };
+  const plans = [
+    {
+      name: "Plan Silver",
+      price: "$29",
+      currency: "USD",
+      period: " / mes",
+      description: "La herramienta digital definitiva para consultores y vendedores de perfumería. Accede al catálogo, comparte fichas técnicas y cierra ventas ágilmente.",
+      features: [
+        "Uso completo Online y Offline (sin necesidad de internet)",
+        "Buscador Inteligente por notas, marcas y familias olfativas",
+        "Generación y envío de fichas técnicas ilimitadas",
+        "Precios de referencia departamentales integrados",
+        "Acceso inmediato en todos tus dispositivos",
+        "Botón de cotizaciones automáticas directo a WhatsApp"
+      ],
+      dbPlan: "Silver Collector",
+      dbPrice: 29.00,
+      badge: "Acceso App"
+    },
+    {
+      name: "Plan Gold",
+      price: "$49",
+      currency: "USD",
+      period: " / mes",
+      description: "El plan ideal para revendedores y distribuidores B2B. Administra múltiples catálogos y coordina a tu equipo de ventas.",
+      features: [
+        "Todo lo incluido en el plan Silver",
+        "Administración de empresas y catálogos B2B",
+        "Límite de hasta 10 licencias para sub-vendedores",
+        "Personalización de logotipo y branding propio",
+        "Configuración de precios de mayoreo/distribución",
+        "Soporte prioritario y reportes de ventas"
+      ],
+      dbPlan: "VIP Gold Perfumer",
+      dbPrice: 49.00,
+      badge: "B2B & Red de Ventas",
+      isPopular: true
+    }
+  ];
 
-  const handlePurchase = async () => {
+  const handlePurchase = async (plan: typeof plans[0]) => {
     if (!user) {
       navigate("/register");
       return;
     }
 
-    setLoadingPurchase(true);
+    setLoadingPlan(plan.dbPlan);
     try {
       const startDate = new Date().toISOString().split("T")[0];
       const nextRenewal = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
 
       await suscripcionesService.create({
         usuarioId: user.id,
-        plan: appProduct.dbPlan,
+        plan: plan.dbPlan,
         status: 'Active',
-        price: appProduct.dbPrice,
+        price: plan.dbPrice,
         startDate,
         nextRenewal
       });
@@ -56,7 +78,7 @@ export function PublicPlansPage() {
       console.error("Error creating subscription:", error);
       alert("Ocurrió un error al procesar tu adquisición. Inténtalo de nuevo.");
     } finally {
-      setLoadingPurchase(false);
+      setLoadingPlan(null);
     }
   };
 
@@ -75,13 +97,13 @@ export function PublicPlansPage() {
 
         <div className="text-center space-y-4 mb-16 max-w-2xl">
           <span className="text-[11px] font-sans-clean font-bold tracking-[0.4em] uppercase text-[#C5A028]">
-            THE ONE • APLICACIÓN DIGITAL
+            THE ONE • PLANES DE ADQUISICIÓN
           </span>
           <h1 className="text-4xl sm:text-6xl font-serif-elegant font-light tracking-tight text-black leading-tight">
-            Adquiere el Catálogo <span className="italic text-gold font-normal">Digital</span>
+            Selecciona tu <span className="italic text-gold font-normal">Plan</span>
           </h1>
           <p className="text-sm sm:text-base font-sans-clean font-light text-black/50 leading-relaxed">
-            Obtén acceso inmediato a la aplicación móvil y automatiza tu proceso de ventas de alta perfumería.
+            Obtén acceso inmediato a la aplicación móvil o administra tu red de vendedores B2B.
           </p>
         </div>
 
@@ -119,52 +141,74 @@ export function PublicPlansPage() {
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="flex justify-center w-full"
+              className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-5xl"
             >
-              <Card 
-                className="p-8 border rounded-none bg-white flex flex-col justify-between relative transition-all duration-500 shadow-2xl border-secondary max-w-lg w-full"
-              >
-                <div className="absolute top-0 right-8 -translate-y-1/2 bg-secondary text-white text-[9px] font-sans-clean font-black tracking-widest uppercase py-1 px-3">
-                  Acceso Total
-                </div>
+              {plans.map((plan) => (
+                <Card 
+                  key={plan.dbPlan}
+                  className={`p-8 border rounded-xl bg-white flex flex-col justify-between relative transition-all duration-500 shadow-2xl w-full ${
+                    plan.isPopular ? 'border-[#C5A028] ring-1 ring-[#C5A028]/20' : 'border-black/5'
+                  }`}
+                >
+                  <div className="space-y-6 text-left">
+                    <div className="flex items-center justify-between">
+                      <span className={`text-[10px] font-sans-clean font-bold tracking-widest uppercase py-1 px-3 rounded-full border ${
+                        plan.isPopular 
+                          ? 'border-[#C5A028] text-[#C5A028] bg-[#C5A028]/5' 
+                          : 'border-black/20 text-black/60 bg-black/5'
+                      }`}>
+                        {plan.badge}
+                      </span>
+                      {plan.isPopular && (
+                        <span className="text-[10px] font-sans-clean font-bold tracking-widest uppercase text-[#C5A028] flex items-center gap-1">
+                          Recomendado ★
+                        </span>
+                      )}
+                    </div>
 
-                <div className="space-y-6 text-left">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="text-2xl font-serif-elegant font-bold text-black">{appProduct.name}</h3>
-                      <p className="text-xs font-sans-clean font-light text-black/40 mt-2">{appProduct.description}</p>
+                    <div className="flex justify-between items-start pt-2">
+                      <div>
+                        <h3 className="text-2xl font-serif-elegant font-bold text-black">{plan.name}</h3>
+                        <p className="text-xs font-sans-clean font-light text-black/40 mt-2">{plan.description}</p>
+                      </div>
+                      <div className={`p-2.5 rounded-xl text-white ${
+                        plan.isPopular ? 'bg-gradient-to-br from-amber-500 to-yellow-600' : 'bg-black/80'
+                      }`}>
+                        <Smartphone size={24} />
+                      </div>
                     </div>
-                    <div className="p-2.5 rounded-xl bg-gradient-to-br from-[#7C3AED] via-[#9333EA] to-[#D946EF] text-white">
-                      <Smartphone size={24} />
+
+                    <div className="flex items-baseline gap-1 py-4 border-y border-black/5">
+                      <span className="text-5xl font-serif-elegant font-black text-black">{plan.price}</span>
+                      <span className="text-xs font-sans-clean font-bold text-black/40 self-end mb-1 ml-1">{plan.currency}</span>
+                      <span className="text-sm font-sans-clean font-light text-black/40">{plan.period}</span>
                     </div>
+
+                    <ul className="space-y-3.5">
+                      {plan.features.map((feat) => (
+                        <li key={feat} className="flex items-start gap-2.5 text-xs font-sans-clean font-light text-black/60 leading-tight">
+                          <Check size={14} className="text-[#C5A028] mt-0.5 flex-shrink-0" />
+                          <span>{feat}</span>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
 
-                  <div className="flex items-baseline gap-1 py-4 border-y border-black/5">
-                    <span className="text-5xl font-serif-elegant font-black text-black">{appProduct.price}</span>
-                    <span className="text-xs font-sans-clean font-bold text-black/40 self-end mb-1 ml-1">{appProduct.currency}</span>
-                    <span className="text-sm font-sans-clean font-light text-black/40">{appProduct.period}</span>
+                  <div className="pt-8">
+                    <Button 
+                      isLoading={loadingPlan === plan.dbPlan}
+                      onPress={() => handlePurchase(plan)}
+                      className={`w-full font-sans-clean font-bold text-xs tracking-widest uppercase h-12 rounded-none transition-all ${
+                        plan.isPopular 
+                          ? 'bg-[#C5A028] text-white hover:bg-gold/90 shadow-lg shadow-gold/20' 
+                          : 'bg-black text-white hover:bg-black/90 shadow-lg shadow-black/20'
+                      }`}
+                    >
+                      Adquirir {plan.name}
+                    </Button>
                   </div>
-
-                  <ul className="space-y-3.5">
-                    {appProduct.features.map((feat) => (
-                      <li key={feat} className="flex items-start gap-2.5 text-xs font-sans-clean font-light text-black/60 leading-tight">
-                        <Check size={14} className="text-secondary mt-0.5 flex-shrink-0" />
-                        <span>{feat}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                <div className="pt-8">
-                  <Button 
-                    isLoading={loadingPurchase}
-                    onPress={handlePurchase}
-                    className="w-full font-sans-clean font-bold text-xs tracking-widest uppercase h-12 rounded-none transition-all bg-secondary text-white hover:bg-secondary/90 shadow-lg shadow-secondary/20"
-                  >
-                    Adquirir Acceso a la App
-                  </Button>
-                </div>
-              </Card>
+                </Card>
+              ))}
             </motion.div>
           )}
         </AnimatePresence>
@@ -173,3 +217,4 @@ export function PublicPlansPage() {
     </div>
   );
 }
+

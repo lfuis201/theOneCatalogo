@@ -22,9 +22,10 @@ interface ProductoModalProps {
   onOpenChange: () => void;
   onSubmit: (producto: Partial<Producto>) => void;
   producto?: Producto | null; // Para modo de edición
+  isLoading?: boolean;
 }
 
-export function ProductoModal({ isOpen, onOpenChange, onSubmit, producto }: ProductoModalProps) {
+export function ProductoModal({ isOpen, onOpenChange, onSubmit, producto, isLoading }: ProductoModalProps) {
   const { categorias } = useCategorias();
   const { uploadImage, isUploading } = useProductos();
 
@@ -137,6 +138,7 @@ export function ProductoModal({ isOpen, onOpenChange, onSubmit, producto }: Prod
                     <InputGroup.Input
                       placeholder="Ej. GOTAS DE COLOR"
                       {...register("nombre")}
+                      value={watch("nombre") || ""}
                       className="px-3 text-sm font-medium"
                     />
                   </InputGroup>
@@ -149,6 +151,7 @@ export function ProductoModal({ isOpen, onOpenChange, onSubmit, producto }: Prod
                     <InputGroup.Input
                       placeholder="Ej. Armaf"
                       {...register("marca")}
+                      value={watch("marca") || ""}
                       className="px-3 text-sm font-medium"
                     />
                   </InputGroup>
@@ -210,6 +213,7 @@ export function ProductoModal({ isOpen, onOpenChange, onSubmit, producto }: Prod
                     <InputGroup.Input
                       placeholder="Ej. FLORAL FRUTAL"
                       {...register("familiaOlfativa")}
+                      value={watch("familiaOlfativa") || ""}
                       className="px-3 text-sm font-medium"
                     />
                   </InputGroup>
@@ -222,6 +226,7 @@ export function ProductoModal({ isOpen, onOpenChange, onSubmit, producto }: Prod
                     <InputGroup.Input
                       placeholder="Ej. 100 ML"
                       {...register("volumen")}
+                      value={watch("volumen") || ""}
                       className="px-3 text-sm font-medium"
                     />
                   </InputGroup>
@@ -234,6 +239,7 @@ export function ProductoModal({ isOpen, onOpenChange, onSubmit, producto }: Prod
                     <InputGroup.Input
                       placeholder="Ej. 2023"
                       {...register("anio")}
+                      value={watch("anio") || ""}
                       className="px-3 text-sm font-medium"
                     />
                   </InputGroup>
@@ -246,6 +252,7 @@ export function ProductoModal({ isOpen, onOpenChange, onSubmit, producto }: Prod
                     <InputGroup.Input
                       placeholder="Ej. #6679"
                       {...register("codigo")}
+                      value={watch("codigo") || ""}
                       className="px-3 text-sm font-medium"
                     />
                   </InputGroup>
@@ -259,6 +266,7 @@ export function ProductoModal({ isOpen, onOpenChange, onSubmit, producto }: Prod
                       type="number"
                       placeholder="0.00"
                       {...register("precioTienda")}
+                      value={watch("precioTienda") ?? ""}
                       className="px-3 text-sm font-medium"
                     />
                   </InputGroup>
@@ -312,6 +320,7 @@ export function ProductoModal({ isOpen, onOpenChange, onSubmit, producto }: Prod
                   <textarea
                     placeholder="Ej. 2018. BERGAMOTA, NARANJA, CEDRÓN..."
                     {...register("notas")}
+                    value={watch("notas") || ""}
                     className="w-full bg-transparent outline-none resize-y min-h-[80px] px-2 py-1 text-sm font-medium text-default-900"
                   />
                 </div>
@@ -329,6 +338,8 @@ export function ProductoModal({ isOpen, onOpenChange, onSubmit, producto }: Prod
               </Button>
               <Button 
                 type="submit"
+                isLoading={isLoading}
+                isDisabled={isLoading || isUploading}
                 className="bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/30 h-11 px-6"
               >
                 {producto ? "Guardar Cambios" : "Guardar Perfume"}

@@ -86,6 +86,7 @@ export function EmpresaModal({ isOpen, onOpenChange, onSubmit, empresa }: Empres
                     <InputGroup.Input 
                       placeholder="Ej. Distribuidora Central"
                       {...register("nombre")}
+                      value={watch("nombre") || ""}
                       className="px-3 text-sm font-medium"
                     />
                   </InputGroup>
@@ -99,6 +100,7 @@ export function EmpresaModal({ isOpen, onOpenChange, onSubmit, empresa }: Empres
                     <InputGroup.Input 
                       placeholder="https://ejemplo.com/logo.png"
                       {...register("logo_url")}
+                      value={watch("logo_url") || ""}
                       className="px-3 text-sm font-medium"
                     />
                   </InputGroup>

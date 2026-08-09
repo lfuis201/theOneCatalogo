@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button, Card } from "@heroui/react";
+import { Button, Card, toast } from "@heroui/react";
 import { Plus, Users } from "lucide-react";
 import { ClientesTable } from "../components/ClientesTable";
 import { ClienteModal } from "../components/ClienteModal";
@@ -19,6 +19,7 @@ export default function ClientesPage() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCliente, setEditingCliente] = useState<Cliente | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleOpenChange = () => {
     if (isModalOpen) {
@@ -38,14 +39,22 @@ export default function ClientesPage() {
   };
 
   const handleFormSubmit = async (data: any) => {
+    setIsSaving(true);
     try {
       if (editingCliente) {
         await updateCliente({ id: editingCliente.id, data });
+        toast.success("¡Cliente actualizado con éxito!");
       } else {
         await createCliente(data);
+        toast.success("¡Cliente creado con éxito!");
       }
-    } catch (err) {
+      setIsModalOpen(false);
+      setEditingCliente(null);
+    } catch (err: any) {
       console.error("Error guardando cliente:", err);
+      toast.error(err?.message || "Ocurrió un error al guardar el cliente.");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -53,8 +62,10 @@ export default function ClientesPage() {
     if (window.confirm("¿Estás seguro de que deseas eliminar este cliente?")) {
       try {
         await deleteCliente(id);
-      } catch (err) {
+        toast.success("¡Cliente eliminado con éxito!");
+      } catch (err: any) {
         console.error("Error eliminando cliente:", err);
+        toast.error(err?.message || "Ocurrió un error al eliminar el cliente.");
       }
     }
   };
@@ -123,6 +134,7 @@ export default function ClientesPage() {
           onOpenChange={handleOpenChange} 
           onSubmit={handleFormSubmit} 
           cliente={editingCliente}
+          isLoading={isSaving}
         />
       )}
     </div>

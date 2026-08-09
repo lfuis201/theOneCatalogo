@@ -2,11 +2,21 @@ import { supabase } from '../../../shared/lib/supabase';
 import type { Subscription } from '../types';
 
 export const suscripcionesService = {
-  async getAll(): Promise<Subscription[]> {
-    const { data, error } = await supabase
+  async getAll(empresaId?: string | null, isSuperAdmin?: boolean): Promise<Subscription[]> {
+    let query = supabase
       .from('suscripciones')
       .select('*, usuarios:usuario_id(nombre, email)')
       .order('created_at', { ascending: false });
+
+    if (!isSuperAdmin) {
+      if (empresaId) {
+        query = query.eq('empresa_id', empresaId);
+      } else {
+        query = query.is('empresa_id', null);
+      }
+    }
+
+    const { data, error } = await query;
 
     if (error) throw error;
 
@@ -55,7 +65,43 @@ export const suscripcionesService = {
     price: number;
     startDate: string;
     nextRenewal: string;
-  }): Promise<void> {
+  }, empresaId?: string | null): Promise<void> {
+    // Si la acción proviene de un Admin de Empresa (tenant), se valida el límite de licencias permitidas
+    if (empresaId) {
+      // 1. Obtener la configuración del plan asignado al Admin/Empresa
+      const { data: subAdmin } = await supabase
+        .from('suscripciones')
+        .select('plan')
+        .eq('empresa_id', empresaId)
+        .eq('status', 'Active')
+        .maybeSingle();
+
+      const planCode = subAdmin?.plan || 'Silver Collector';
+
+      // 2. Obtener el límite de suscripciones permitido desde planes_config
+      const { data: planConfig } = await supabase
+        .from('planes_config')
+        .select('limite_suscripciones')
+        .eq('plan', planCode)
+        .maybeSingle();
+
+      const maxPermitido = planConfig?.limite_suscripciones ?? 50;
+
+      // 3. Contar la cantidad actual de suscripciones registradas por esta empresa
+      const { count, error: countError } = await supabase
+        .from('suscripciones')
+        .select('id', { count: 'exact', head: true })
+        .eq('empresa_id', empresaId);
+
+      if (countError) throw countError;
+
+      if ((count || 0) >= maxPermitido) {
+        throw new Error(
+          `Has alcanzado el límite máximo de ${maxPermitido} licencias/suscripciones permitidas para tu plan (${planCode}). Actualiza tu plan para registrar más.`
+        );
+      }
+    }
+
     const { error } = await supabase
       .from('suscripciones')
       .insert({
@@ -65,6 +111,7 @@ export const suscripcionesService = {
         price: suscripcion.price,
         start_date: suscripcion.startDate,
         next_renewal: suscripcion.nextRenewal,
+        empresa_id: empresaId ?? null,
       });
 
     if (error) throw error;

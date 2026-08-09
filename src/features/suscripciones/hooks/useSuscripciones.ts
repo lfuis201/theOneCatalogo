@@ -1,12 +1,17 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { suscripcionesService } from '../services/suscripcionesService';
+import { useAuth } from '../../auth/hooks/useAuth';
 
 export function useSuscripciones() {
   const queryClient = useQueryClient();
+  const { profile } = useAuth();
+
+  const empresaId = profile?.empresa_id;
+  const isSuperAdmin = profile?.rol === 'superadmin';
 
   const suscripcionesQuery = useQuery({
-    queryKey: ['suscripciones'],
-    queryFn: suscripcionesService.getAll,
+    queryKey: ['suscripciones', empresaId, isSuperAdmin],
+    queryFn: () => suscripcionesService.getAll(empresaId, isSuperAdmin),
   });
 
   const createSuscripcionMutation = useMutation({
@@ -17,7 +22,7 @@ export function useSuscripciones() {
       price: number;
       startDate: string;
       nextRenewal: string;
-    }) => suscripcionesService.create(newSuscripcion),
+    }) => suscripcionesService.create(newSuscripcion, empresaId),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['suscripciones'] });
     },

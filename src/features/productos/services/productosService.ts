@@ -36,12 +36,21 @@ export function mapProductoToRow(producto: Partial<Producto>): any {
 }
 
 export const productosService = {
-  async getAll(): Promise<Producto[]> {
-    const { data, error } = await supabase
+  async getAll(empresaId?: string | null, isSuperAdmin?: boolean): Promise<Producto[]> {
+    let query = supabase
       .from('productos')
       .select('*')
       .order('created_at', { ascending: false });
 
+    if (!isSuperAdmin) {
+      if (empresaId) {
+        query = query.eq('empresa_id', empresaId);
+      } else {
+        query = query.is('empresa_id', null);
+      }
+    }
+
+    const { data, error } = await query;
     if (error) throw error;
     return (data || []).map(mapRowToProducto);
   },
@@ -57,8 +66,12 @@ export const productosService = {
     return mapRowToProducto(data);
   },
 
-  async create(producto: Partial<Producto>): Promise<Producto> {
+  async create(producto: Partial<Producto>, empresaId?: string | null): Promise<Producto> {
     const row = mapProductoToRow(producto);
+    if (empresaId !== undefined) {
+      row.empresa_id = empresaId;
+    }
+
     const { data, error } = await supabase
       .from('productos')
       .insert(row)

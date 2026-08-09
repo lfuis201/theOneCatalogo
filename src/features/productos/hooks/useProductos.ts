@@ -2,27 +2,23 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { productosService } from '../services/productosService';
 import type { Producto } from '../types';
 import { useState } from 'react';
+import { useAuth } from '../../auth/hooks/useAuth';
 
 export function useProductos() {
   const queryClient = useQueryClient();
   const [isUploading, setIsUploading] = useState(false);
+  const { profile } = useAuth();
+
+  const empresaId = profile?.empresa_id;
+  const isSuperAdmin = profile?.rol === 'superadmin';
 
   const uploadImage = async (file: File): Promise<string> => {
     const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || "dajklcwc4";
-    const apiKey = import.meta.env.VITE_CLOUDINARY_API_KEY || "986225729123396";
-    const apiSecret = import.meta.env.VITE_CLOUDINARY_API_SECRET || "Ie6ElXmSXNl_rJm_nJs-8HukyLgager";
-
-    const timestamp = Math.round(new Date().getTime() / 1000);
-    const msgBuffer = new TextEncoder().encode(`timestamp=${timestamp}${apiSecret}`);
-    const hashBuffer = await crypto.subtle.digest("SHA-1", msgBuffer);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const signature = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+    const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || "ml_default";
 
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("api_key", apiKey);
-    formData.append("timestamp", timestamp.toString());
-    formData.append("signature", signature);
+    formData.append("upload_preset", uploadPreset);
 
     try {
       setIsUploading(true);
@@ -32,7 +28,12 @@ export function useProductos() {
       });
 
       if (!response.ok) {
-        throw new Error("Error en la subida a Cloudinary");
+        // Fallback a FileReader base64 si el preset está en modo Signed
+        return new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.readAsDataURL(file);
+        });
       }
 
       const data = await response.json();
@@ -43,12 +44,12 @@ export function useProductos() {
   };
 
   const productosQuery = useQuery({
-    queryKey: ['productos'],
-    queryFn: productosService.getAll,
+    queryKey: ['productos', empresaId, isSuperAdmin],
+    queryFn: () => productosService.getAll(empresaId, isSuperAdmin),
   });
 
   const createProductoMutation = useMutation({
-    mutationFn: (newProducto: Partial<Producto>) => productosService.create(newProducto),
+    mutationFn: (newProducto: Partial<Producto>) => productosService.create(newProducto, empresaId),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['productos'] });
     },

@@ -83,7 +83,7 @@ export default function EmpresasPage() {
         <div className="space-y-1">
           <h1 className="text-4xl font-black tracking-tight text-default-900 flex items-center gap-3">
             <Building className="text-primary" size={32} />
-            Gestión de Empresas (Tenants B2B)
+            Gestión de Empresas B2B
           </h1>
           <p className="text-default-500 font-medium">Administra las marcas, distribuidoras y tiendas registradas en la plataforma.</p>
         </div>

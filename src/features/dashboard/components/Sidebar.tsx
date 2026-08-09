@@ -9,6 +9,7 @@ import {
   Tag,
   ShieldAlert,
   Building,
+  User,
 } from "lucide-react";
 import { useLocation, Link } from "react-router-dom";
 import { useAuth } from "../../auth/hooks/useAuth";
@@ -23,16 +24,17 @@ export function Sidebar() {
     { path: "/clientes", label: "Clientes", icon: <Users size={20} /> },
     { path: "/productos", label: "Perfumes", icon: <Package size={20} /> },
     { path: "/categorias", label: "Categorías", icon: <Tag size={20} /> },
-    { path: "/suscripciones", label: "Suscripciones", icon: <CreditCard size={20} /> },
+    { path: "/suscripciones", label: "Licencias", icon: <CreditCard size={20} /> },
   ];
 
   const adminItems = [
-    { path: "/configuracion", label: "Configuración", icon: <Settings size={20} /> },
+    { path: "/configuracion", label: "Perfil / Configuración", icon: <User size={20} /> },
     ...(role === 'superadmin' ? [
       { path: "/superadmin", label: "Admins", icon: <ShieldAlert size={20} /> },
       { path: "/superadmin/empresas", label: "Empresas", icon: <Building size={20} /> },
       { path: "/superadmin/productos", label: "Prod. Globales", icon: <Package size={20} /> },
-      { path: "/superadmin/suscripciones", label: "Lic. Globales", icon: <CreditCard size={20} /> }
+      { path: "/superadmin/suscripciones", label: "Lic. Globales", icon: <CreditCard size={20} /> },
+      { path: "/superadmin/planes", label: "Config. Planes", icon: <Settings size={20} /> }
     ] : []),
   ];
 
@@ -46,27 +48,29 @@ export function Sidebar() {
 
       {/* Navigation */}
       <div className="flex-1 overflow-y-auto space-y-6">
-        <div>
-          <p className="px-2 text-tiny font-bold text-zinc-500 uppercase tracking-widest mb-4">Menú Principal</p>
-          <div className="space-y-1">
-            {menuItems.map((item) => {
-              const isActive = location.pathname === item.path;
-              return (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  className={`flex items-center gap-2 px-3 h-10 rounded-xl transition-all font-bold no-underline ${isActive
-                      ? "bg-primary text-white shadow-lg shadow-primary/20"
-                      : "text-zinc-400 hover:bg-zinc-900 hover:text-white"
-                    }`}
-                >
-                  {item.icon}
-                  <span>{item.label}</span>
-                </Link>
-              );
-            })}
+        {role !== 'superadmin' && (
+          <div>
+            <p className="px-2 text-tiny font-bold text-zinc-500 uppercase tracking-widest mb-4">Menú Principal</p>
+            <div className="space-y-1">
+              {menuItems.map((item) => {
+                const isActive = location.pathname === item.path;
+                return (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    className={`flex items-center gap-2 px-3 h-10 rounded-xl transition-all font-bold no-underline ${isActive
+                        ? "bg-primary text-white shadow-lg shadow-primary/20"
+                        : "text-zinc-400 hover:bg-zinc-900 hover:text-white"
+                      }`}
+                  >
+                    {item.icon}
+                    <span>{item.label}</span>
+                  </Link>
+                );
+              })}
+            </div>
           </div>
-        </div>
+        )}
 
         {(role === 'admin' || role === 'superadmin') && (
           <div>

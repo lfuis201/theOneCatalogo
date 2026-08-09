@@ -21,6 +21,7 @@ export default function ProductosPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProducto, setEditingProducto] = useState<Producto | null>(null);
   const [fichaProducto, setFichaProducto] = useState<Producto | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleOpenChange = () => {
     if (isModalOpen) {
@@ -40,6 +41,7 @@ export default function ProductosPage() {
   };
 
   const handleFormSubmit = async (data: Partial<Producto>) => {
+    setIsSaving(true);
     try {
       if (editingProducto) {
         await updateProducto({ id: editingProducto.id, data });
@@ -48,9 +50,21 @@ export default function ProductosPage() {
         await createProducto(data);
         toast.success("¡Perfume creado con éxito!");
       }
-    } catch (err) {
+      setIsModalOpen(false);
+      setEditingProducto(null);
+    } catch (err: any) {
       console.error("Error guardando producto:", err);
-      toast.error("Ocurrió un error al guardar el perfume.");
+      let errorMsg = "Ocurrió un error al guardar el perfume.";
+
+      if (err?.code === "23505" || err?.message?.includes("productos_code_key") || err?.details?.includes("code")) {
+        errorMsg = `El código "${data.codigo}" ya pertenece a otro perfume. Usa un código único.`;
+      } else if (err?.message) {
+        errorMsg = err.message;
+      }
+
+      toast.error(errorMsg);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -131,6 +145,7 @@ export default function ProductosPage() {
         onOpenChange={handleOpenChange} 
         onSubmit={handleFormSubmit}
         producto={editingProducto}
+        isLoading={isSaving}
       />
 
       <ProductoFichaModal

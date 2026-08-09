@@ -19,9 +19,10 @@ interface ClienteModalProps {
   onOpenChange: () => void;
   onSubmit: (data: ClienteFormValues) => void;
   cliente?: Cliente | null;
+  isLoading?: boolean;
 }
 
-export function ClienteModal({ isOpen, onOpenChange, onSubmit, cliente }: ClienteModalProps) {
+export function ClienteModal({ isOpen, onOpenChange, onSubmit, cliente, isLoading }: ClienteModalProps) {
   const [showPassword, setShowPassword] = useState(false);
 
   const {
@@ -70,8 +71,13 @@ export function ClienteModal({ isOpen, onOpenChange, onSubmit, cliente }: Client
 
   const handleFormSubmit = (data: ClienteFormValues) => {
     onSubmit(data);
-    reset();
-    onOpenChange();
+  };
+
+  const getSingleKey = (selection: any): string => {
+    if (selection instanceof Set || (selection && typeof selection === 'object' && Symbol.iterator in selection)) {
+      return Array.from(selection)[0] as string;
+    }
+    return selection as string;
   };
 
   return (
@@ -97,6 +103,7 @@ export function ClienteModal({ isOpen, onOpenChange, onSubmit, cliente }: Client
                     <InputGroup.Input 
                       placeholder="Ej. Juan Pérez"
                       {...register("nombre")}
+                      value={watch("nombre") || ""}
                       className="px-3 text-sm font-medium"
                     />
                   </InputGroup>
@@ -110,6 +117,7 @@ export function ClienteModal({ isOpen, onOpenChange, onSubmit, cliente }: Client
                     <InputGroup.Input 
                       placeholder="ejemplo@correo.com"
                       {...register("email")}
+                      value={watch("email") || ""}
                       className="px-3 text-sm font-medium"
                       disabled={!!cliente}
                     />
@@ -125,6 +133,7 @@ export function ClienteModal({ isOpen, onOpenChange, onSubmit, cliente }: Client
                         type={showPassword ? "text" : "password"}
                         placeholder="Mínimo 6 caracteres"
                         {...register("password")}
+                        value={watch("password") || ""}
                         className="px-3 text-sm font-medium"
                       />
                       <InputGroup.Suffix className="pr-2">
@@ -150,6 +159,7 @@ export function ClienteModal({ isOpen, onOpenChange, onSubmit, cliente }: Client
                     <InputGroup.Input 
                       placeholder="555-0000"
                       {...register("telefono")}
+                      value={watch("telefono") || ""}
                       className="px-3 text-sm font-medium"
                     />
                   </InputGroup>
@@ -157,12 +167,13 @@ export function ClienteModal({ isOpen, onOpenChange, onSubmit, cliente }: Client
                 </TextField>
 
                 <TextField isInvalid={!!errors.empresa}>
-                  <Label className="text-primary font-bold mb-1 ml-1 text-sm">Empresa</Label>
+                  <Label className="text-primary font-bold mb-1 ml-1 text-sm">Empresa / Negocio</Label>
                   <InputGroup className="bg-primary/5 border-primary/10 hover:border-primary/20 focus-within:!border-primary rounded-xl h-11 transition-all">
                     <InputGroup.Prefix className="pl-3 text-primary/40"><Building size={18} /></InputGroup.Prefix>
                     <InputGroup.Input 
                       placeholder="Opcional"
                       {...register("empresa")}
+                      value={watch("empresa") || ""}
                       className="px-3 text-sm font-medium"
                     />
                   </InputGroup>
@@ -174,7 +185,7 @@ export function ClienteModal({ isOpen, onOpenChange, onSubmit, cliente }: Client
                     <Label className="text-primary font-bold mb-1 ml-1 text-sm">Estado del Cliente</Label>
                     <Select
                       selectedKey={selectedStatus}
-                      onSelectionChange={(key) => setValue("status", key as any)}
+                      onSelectionChange={(keys) => setValue("status", getSingleKey(keys) as any)}
                       className="w-full"
                     >
                       <Select.Trigger className="bg-primary/5 border-primary/10 hover:border-primary/20 focus-within:!border-primary rounded-xl h-11 transition-all shadow-sm">
@@ -197,11 +208,14 @@ export function ClienteModal({ isOpen, onOpenChange, onSubmit, cliente }: Client
                 color="danger" 
                 onPress={() => onOpenChange()}
                 className="font-bold rounded-xl"
+                isDisabled={isLoading}
               >
                 Cancelar
               </Button>
               <Button 
                 type="submit"
+                isLoading={isLoading}
+                isDisabled={isLoading}
                 className="bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/30"
               >
                 {cliente ? "Guardar Cambios" : "Guardar Cliente"}

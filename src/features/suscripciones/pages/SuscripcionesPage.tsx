@@ -11,10 +11,12 @@ import {
   InputGroup,
   Select,
   ListBox,
+  toast,
 } from "@heroui/react";
 import { Plus, CreditCard, Sparkles, Check, Activity, Trash2, ShieldAlert, Edit, DollarSign } from "lucide-react";
 import { useSuscripciones } from "../hooks/useSuscripciones";
 import { useClientes } from "../../clientes/hooks/useClientes";
+import { planesConfigService, type PlanConfig } from "../../superadmin/services/planesConfigService";
 import { SuscripcionPagosModal } from "../components/SuscripcionPagosModal";
 import type { Subscription, SubscriptionPlan } from "../types";
 
@@ -37,6 +39,7 @@ export default function SuscripcionesPage() {
   const [editingSub, setEditingSub] = useState<Subscription | null>(null);
   const [isPagosModalOpen, setIsPagosModalOpen] = useState(false);
   const [selectedSubForPagos, setSelectedSubForPagos] = useState<Subscription | null>(null);
+  const [planesConfig, setPlanesConfig] = useState<PlanConfig[]>([]);
 
   // Form States
   const [selectedUsuarioId, setSelectedUsuarioId] = useState("");
@@ -46,14 +49,32 @@ export default function SuscripcionesPage() {
   const [startDate, setStartDate] = useState("");
   const [nextRenewal, setNextRenewal] = useState("");
 
-  // Sync price when plan changes during creation
+  const getSingleKey = (selection: any): string => {
+    if (selection instanceof Set || (selection && typeof selection === 'object' && Symbol.iterator in selection)) {
+      return Array.from(selection)[0] as string;
+    }
+    return selection as string;
+  };
+
+  useEffect(() => {
+    planesConfigService.getAll().then((data) => {
+      setPlanesConfig(data);
+    }).catch(console.error);
+  }, []);
+
+  const silverPlanConfig = useMemo(() => {
+    return planesConfig.find(p => p.plan === 'Silver Collector');
+  }, [planesConfig]);
+
+  // Sync price when plan changes during creation or when silverPlanConfig loads
   useEffect(() => {
     if (!editingSub) {
-      if (selectedPlan === 'Bronze Decanter') setCustomPrice("15.00");
-      else if (selectedPlan === 'Silver Collector') setCustomPrice("29.00");
-      else if (selectedPlan === 'VIP Gold Perfumer') setCustomPrice("49.00");
+      if (selectedPlan === 'Silver Collector') {
+        const price = silverPlanConfig?.precio_sugerido ?? 29;
+        setCustomPrice(price.toString());
+      }
     }
-  }, [selectedPlan, editingSub]);
+  }, [selectedPlan, editingSub, silverPlanConfig]);
 
   // Reset form states when modal opens/closes or when editingSub changes
   useEffect(() => {
@@ -120,8 +141,9 @@ export default function SuscripcionesPage() {
       }
       setIsModalOpen(false);
       setEditingSub(null);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error guardando suscripción:", err);
+      toast.error(err?.message || "Error al activar la suscripción.");
     }
   };
 
@@ -229,7 +251,7 @@ export default function SuscripcionesPage() {
         </Card>
         <Card className="p-6 border-none shadow-xl shadow-primary/5 rounded-[2rem] bg-white flex flex-row items-center justify-between">
           <div>
-            <p className="text-sm font-bold text-default-400 uppercase tracking-wider mb-1">Suscripciones Activas</p>
+            <p className="text-sm font-bold text-default-400 uppercase tracking-wider mb-1">Licencias Activas</p>
             <p className="text-3xl font-black text-success">{metrics.activeCount}</p>
           </div>
           <div className="p-4 bg-success/10 rounded-2xl text-success">
@@ -240,7 +262,7 @@ export default function SuscripcionesPage() {
 
       {/* Subscriptions Table */}
       <div className="space-y-4">
-        <h2 className="text-xl font-black text-default-800 tracking-tight">Listado de Suscriptores</h2>
+        <h2 className="text-xl font-black text-default-800 tracking-tight">Listado de Licencias / Suscriptores</h2>
         <Table>
           <Table.ScrollContainer>
             <Table.Content aria-label="Tabla de suscripciones" className="min-w-[600px]">
@@ -375,38 +397,41 @@ export default function SuscripcionesPage() {
 
                 {/* Cliente Selector (only visible on creation) */}
                 {!editingSub && (
-                  <Select
-                    value={selectedUsuarioId}
-                    onChange={(val) => setSelectedUsuarioId(val as string)}
-                    placeholder="Selecciona un cliente"
-                    className="w-full"
-                  >
+                  <div className="flex flex-col">
                     <Label className="text-primary font-bold mb-1 ml-1 text-sm">Cliente</Label>
-                    <Select.Trigger className="w-full bg-[#FAFAFA] border border-default-200 rounded-xl px-4 py-2 text-sm text-default-900 focus:outline-none focus:border-primary transition-all cursor-pointer h-11 font-medium flex items-center justify-between">
-                      <Select.Value />
-                      <Select.Indicator />
-                    </Select.Trigger>
-                    <Select.Popover>
-                      <ListBox>
-                        {clientes.map((cli) => (
-                          <ListBox.Item key={cli.id} id={cli.id} textValue={`${cli.nombre} (${cli.email})`}>
-                            <div className="flex flex-col">
-                              <span className="text-sm font-semibold">{cli.nombre}</span>
-                              <span className="text-xs text-default-400">{cli.email}</span>
-                            </div>
-                            <ListBox.ItemIndicator />
-                          </ListBox.Item>
-                        ))}
-                      </ListBox>
-                    </Select.Popover>
-                  </Select>
+                    <Select
+                      selectedKey={selectedUsuarioId}
+                      onSelectionChange={(keys) => setSelectedUsuarioId(getSingleKey(keys))}
+                      className="w-full"
+                    >
+                      <Select.Trigger className="w-full bg-[#FAFAFA] border border-default-200 rounded-xl px-4 py-2 text-sm text-default-900 focus:outline-none focus:border-primary transition-all cursor-pointer h-11 font-medium flex items-center justify-between">
+                        <Select.Value />
+                        <Select.Indicator />
+                      </Select.Trigger>
+                      <Select.Popover>
+                        <ListBox>
+                          {clientes.map((cli) => (
+                            <ListBox.Item key={cli.id} id={cli.id} textValue={`${cli.nombre} (${cli.email})`}>
+                              <div className="flex flex-col">
+                                <span className="text-sm font-semibold">{cli.nombre}</span>
+                                <span className="text-xs text-default-400">{cli.email}</span>
+                              </div>
+                              <ListBox.ItemIndicator />
+                            </ListBox.Item>
+                          ))}
+                        </ListBox>
+                      </Select.Popover>
+                    </Select>
+                  </div>
                 )}
 
                 {/* Plan Selector */}
                 <Select
-                  value={selectedPlan}
-                  onChange={(val) => setSelectedPlan(val as SubscriptionPlan)}
-                  placeholder="Selecciona el plan"
+                  selectedKey={selectedPlan}
+                  onSelectionChange={(keys) => {
+                    const key = getSingleKey(keys) as SubscriptionPlan;
+                    setSelectedPlan(key);
+                  }}
                   className="w-full"
                 >
                   <Label className="text-primary font-bold mb-1 ml-1 text-sm">Selecciona el Plan</Label>
@@ -416,7 +441,9 @@ export default function SuscripcionesPage() {
                   </Select.Trigger>
                   <Select.Popover>
                     <ListBox>
-                      <ListBox.Item id="Silver Collector" textValue="Licencia App ($29.00/mes)">Licencia App ($29.00/mes) <ListBox.ItemIndicator /></ListBox.Item>
+                      <ListBox.Item id="Silver Collector" textValue={silverPlanConfig ? `${silverPlanConfig.nombre_legible} ($${Number(silverPlanConfig.precio_sugerido).toFixed(2)}/mes)` : "Licencia App ($29.00/mes)"}>
+                        {silverPlanConfig ? `${silverPlanConfig.nombre_legible} ($${Number(silverPlanConfig.precio_sugerido).toFixed(2)}/mes)` : "Licencia App ($29.00/mes)"} <ListBox.ItemIndicator />
+                      </ListBox.Item>
                     </ListBox>
                   </Select.Popover>
                 </Select>
@@ -438,9 +465,8 @@ export default function SuscripcionesPage() {
 
                 {/* Status Selector */}
                 <Select
-                  value={selectedStatus}
-                  onChange={(val) => setSelectedStatus(val as any)}
-                  placeholder="Estado"
+                  selectedKey={selectedStatus}
+                  onSelectionChange={(keys) => setSelectedStatus(getSingleKey(keys) as any)}
                   className="w-full"
                 >
                   <Label className="text-primary font-bold mb-1 ml-1 text-sm">Estado de Suscripción</Label>

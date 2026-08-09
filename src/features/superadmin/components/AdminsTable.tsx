@@ -43,15 +43,24 @@ export function AdminsTable({ admins, onEdit, onDelete }: AdminsTableProps) {
           </Chip>
         );
       case "limite_licencias":
+        const hasGold = admin.plan_activo === "VIP Gold Perfumer";
+        const hasSilver = admin.plan_activo === "Silver Collector";
+        const creadas = admin.licencias_creadas || 0;
+        
         return (
-          <Chip
-            className="capitalize border-none font-bold text-default-700"
-            color="primary"
-            size="sm"
-            variant="flat"
-          >
-            {admin.limite_licencias ?? 10} Licencias
-          </Chip>
+          <div className="flex flex-col gap-1">
+            <Chip
+              className="capitalize border-none font-bold"
+              color={hasGold ? "primary" : hasSilver ? "success" : "warning"}
+              size="sm"
+              variant="flat"
+            >
+              {hasGold ? "VIP Gold Perfumer" : hasSilver ? "Silver Collector" : "Sin Suscripción"}
+            </Chip>
+            <span className="text-tiny font-bold text-default-500 ml-1">
+              📊 {creadas} Licencia(s) vendida(s)
+            </span>
+          </div>
         );
       case "actions":
         return (
@@ -93,7 +102,7 @@ export function AdminsTable({ admins, onEdit, onDelete }: AdminsTableProps) {
             <Table.Column isRowHeader>Administrador</Table.Column>
             <Table.Column>Empresa/Negocio</Table.Column>
             <Table.Column>Estado</Table.Column>
-            <Table.Column>Límite de Ventas</Table.Column>
+            <Table.Column>Plan / Licencias</Table.Column>
             <Table.Column>Acciones</Table.Column>
           </Table.Header>
           <Table.Body>
