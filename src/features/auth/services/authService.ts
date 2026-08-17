@@ -53,8 +53,20 @@ export const authService = {
   },
 
   async resetPasswordEmail(email: string, redirectTo?: string) {
+    const siteUrl = window.location.hostname === 'localhost' 
+      ? 'https://www.catalogotheone.com/reset-password'
+      : `${window.location.origin}/reset-password`;
+
     const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: redirectTo || `${window.location.origin}/reset-password`,
+      redirectTo: redirectTo || siteUrl,
+    });
+    if (error) throw error;
+    return data;
+  },
+
+  async updatePassword(newPassword: string) {
+    const { data, error } = await supabase.auth.updateUser({
+      password: newPassword,
     });
     if (error) throw error;
     return data;

@@ -5,6 +5,7 @@ export * from './components/RegisterForm';
 export * from './components/ForgotPasswordForm';
 export * from './pages/AuthPage';
 export * from './pages/RegisterPage';
-export * from './pages/ForgotPasswordPage';
+export { ForgotPasswordPage } from './pages/ForgotPasswordPage';
+export { ResetPasswordPage } from './pages/ResetPasswordPage';
+export { useAuth } from './hooks/useAuth';
 export * from './types';
-
