@@ -2,6 +2,7 @@ import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../features/auth';
 import { AuthPage } from '../features/auth/pages/AuthPage';
 import { RegisterPage } from '../features/auth/pages/RegisterPage';
+import { ForgotPasswordPage } from '../features/auth/pages/ForgotPasswordPage';
 import { Dashboard } from '../features/dashboard';
 import { ClientesPage } from '../features/clientes';
 import { ProductosPage } from '../features/productos';
@@ -77,6 +78,11 @@ export function AppRouter() {
             <Route path="/login" element={
               <PageTransition>
                 <AuthPage />
+              </PageTransition>
+            } />
+            <Route path="/forgot-password" element={
+              <PageTransition>
+                <ForgotPasswordPage />
               </PageTransition>
             } />
             <Route path="/register" element={

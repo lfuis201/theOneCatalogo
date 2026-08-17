@@ -3,6 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Button, InputGroup, TextField, Label, Spinner } from "@heroui/react";
 import { useState } from 'react';
 import { LogIn, Eye, EyeOff } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { loginSchema, type LoginFormValues } from '../schemas/loginSchema';
 
@@ -77,6 +78,14 @@ export function LoginForm() {
           {errors.password && (
             <p className="text-danger text-tiny mt-1 ml-1">{errors.password.message}</p>
           )}
+          <div className="flex justify-end mt-2">
+            <Link 
+              to="/forgot-password" 
+              className="text-xs text-primary/70 hover:text-primary font-medium transition-colors"
+            >
+              ¿Olvidaste tu contraseña?
+            </Link>
+          </div>
         </TextField>
         
         {error && (
