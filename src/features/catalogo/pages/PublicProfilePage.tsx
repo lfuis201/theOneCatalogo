@@ -98,13 +98,36 @@ export function PublicProfilePage() {
                   <CreditCard size={22} />
                 </div>
                 {subscription ? (
-                  <span className={`text-[10px] font-sans-clean font-bold tracking-widest uppercase py-1 px-3.5 border ${
-                    subscription.status.toLowerCase() === "active"
-                      ? "bg-green-50 border-green-200 text-green-600"
-                      : "bg-red-50 border-red-200 text-red-600"
-                  }`}>
-                    {subscription.status.toLowerCase() === "active" ? "Activa" : "Vencida"}
-                  </span>
+                  (() => {
+                    const todayStr = new Date().toISOString().split("T")[0];
+                    const isExpired = subscription.status.toLowerCase() !== "active" || subscription.nextRenewal < todayStr;
+                    const isTrial = subscription.plan === "Trial 7 Días";
+                    
+                    const diffTime = new Date(subscription.nextRenewal).getTime() - new Date().getTime();
+                    const daysLeft = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+
+                    if (isExpired) {
+                      return (
+                        <span className="text-[10px] font-sans-clean font-bold tracking-widest uppercase py-1 px-3.5 border bg-red-50 border-red-200 text-red-600">
+                          {isTrial ? "Prueba Vencida" : "Vencida"}
+                        </span>
+                      );
+                    }
+
+                    if (isTrial) {
+                      return (
+                        <span className="text-[10px] font-sans-clean font-bold tracking-widest uppercase py-1 px-3.5 border bg-emerald-50 border-emerald-300 text-emerald-700">
+                          Prueba ({daysLeft} {daysLeft === 1 ? 'día restante' : 'días restantes'})
+                        </span>
+                      );
+                    }
+
+                    return (
+                      <span className="text-[10px] font-sans-clean font-bold tracking-widest uppercase py-1 px-3.5 border bg-green-50 border-green-200 text-green-600">
+                        Activa
+                      </span>
+                    );
+                  })()
                 ) : (
                   <span className="text-[10px] font-sans-clean font-bold tracking-widest uppercase py-1 px-3.5 bg-yellow-50 border border-yellow-200 text-yellow-600">
                     Sin Plan
@@ -117,9 +140,33 @@ export function PublicProfilePage() {
                   <div>
                     <h3 className="text-xs font-sans-clean font-bold tracking-widest text-black/40 uppercase">Plan Adquirido</h3>
                     <p className="text-2xl font-serif-elegant font-bold text-black mt-1">
-                      {subscription.plan === "Silver Collector" ? "Licencia App THE ONE" : subscription.plan}
+                      {subscription.plan === "Silver Collector"
+                        ? "Licencia App THE ONE (Silver)"
+                        : subscription.plan === "VIP Gold Perfumer"
+                        ? "Licencia B2B (Gold)"
+                        : subscription.plan === "Trial 7 Días"
+                        ? "Prueba Gratuita (7 Días)"
+                        : subscription.plan}
                     </p>
                   </div>
+
+                  {subscription.plan === "Trial 7 Días" && (
+                    <div className="p-4 rounded-xl bg-gradient-to-r from-emerald-50 to-teal-50/50 border border-emerald-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                      <div>
+                        <p className="text-xs font-bold text-emerald-900">Período de Prueba Activo</p>
+                        <p className="text-[11px] text-emerald-700 font-light">
+                          Disfruta de todas las funciones sin costo hasta el {subscription.nextRenewal}.
+                        </p>
+                      </div>
+                      <Button
+                        size="sm"
+                        onPress={() => navigate("/planes")}
+                        className="bg-black text-[#C5A028] hover:bg-black/90 font-sans-clean font-bold text-[10px] tracking-widest uppercase h-8 px-4 rounded-lg flex-shrink-0"
+                      >
+                        Mejorar Plan
+                      </Button>
+                    </div>
+                  )}
 
                   <div className="grid grid-cols-2 gap-4 pt-2 border-t border-black/5">
                     <div>
@@ -172,14 +219,14 @@ export function PublicProfilePage() {
                   <div className="flex gap-2 items-start text-sm font-sans-clean font-light text-black/60 bg-amber-50/50 border border-amber-100 p-4">
                     <AlertCircle size={18} className="text-amber-500 flex-shrink-0 mt-0.5" />
                     <p className="leading-relaxed">
-                      Aún no has adquirido una licencia de la aplicación móvil de **THE ONE**. Adquiere tu acceso mensual para habilitar las ventas digitales.
+                      Aún no has adquirido una licencia de la aplicación móvil de **THE ONE**. Inicia tu prueba de 7 días o adquiere tu acceso mensual.
                     </p>
                   </div>
                   <Button 
                     onPress={() => navigate("/planes")}
                     className="w-full bg-secondary text-white hover:bg-secondary/90 font-sans-clean font-bold text-xs tracking-widest uppercase h-12 rounded-none transition-all flex items-center justify-center gap-2 shadow-lg shadow-secondary/20"
                   >
-                    Ver Planes <ArrowRight size={14} />
+                    Ver Planes y Prueba Gratis <ArrowRight size={14} />
                   </Button>
                 </div>
               )}
@@ -187,8 +234,10 @@ export function PublicProfilePage() {
 
             {subscription && (
               <div className="pt-4 border-t border-black/5 flex justify-between items-center text-xs font-sans-clean font-medium">
-                <span className="text-black/40">Inversión mensual:</span>
-                <span className="text-black font-bold">${subscription.price} USD</span>
+                <span className="text-black/40">Inversión:</span>
+                <span className="text-black font-bold">
+                  {subscription.price === 0 ? "Gratuito (Trial)" : `$${subscription.price} USD`}
+                </span>
               </div>
             )}
           </Card>

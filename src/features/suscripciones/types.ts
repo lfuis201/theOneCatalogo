@@ -1,4 +1,4 @@
-export type SubscriptionPlan = 'Bronze Decanter' | 'Silver Collector' | 'VIP Gold Perfumer';
+export type SubscriptionPlan = 'Trial 7 Días' | 'Bronze Decanter' | 'Silver Collector' | 'VIP Gold Perfumer';
 
 export type Subscription = {
   id: string;

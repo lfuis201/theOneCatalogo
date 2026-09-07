@@ -36,6 +36,25 @@ export const authService = {
       if (profileError) {
         console.error("Error al crear perfil de usuario en base de datos:", profileError);
       }
+
+      // Auto-asignar suscripción de prueba de 7 días
+      const startDate = new Date();
+      const trialEndDate = new Date();
+      trialEndDate.setDate(startDate.getDate() + 7);
+
+      const { error: trialError } = await supabase
+        .from('suscripciones')
+        .insert({
+          usuario_id: data.user.id,
+          plan: 'Trial 7 Días',
+          status: 'Active',
+          price: 0,
+          start_date: startDate.toISOString().split('T')[0],
+          next_renewal: trialEndDate.toISOString().split('T')[0],
+        });
+      if (trialError) {
+        console.error("Error al asignar suscripción de prueba de 7 días:", trialError);
+      }
     }
 
     return data;
